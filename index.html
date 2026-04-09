@@ -1,6 +1,106 @@
-<HTML>
-<head></head>
-<body>
-<h3>Work in progress...</h3>
-</body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Hub</title>
+    <style>
+        /* Essential Minimalism */
+        body {
+            margin: 0;
+            background-color: #ffffff; /* Clean white background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            /* Futura is the star here */
+            font-family: "Futura-Bold", "Futura", "Trebuchet MS", sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .grid-container {
+            width: 90%;
+            display: grid;
+            /* 6x4 Grid */
+            grid-template-columns: repeat(6, 1fr);
+            gap: 15px;
+            padding: 20px;
+        }
+
+        .icon-box {
+            aspect-ratio: 1 / 1;
+            background-color: #000000; /* Black boxes for high contrast */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            transition: opacity 0.2s ease; /* Subtle fade instead of a movement */
+        }
+
+        /* Minimalist hover: just a slight transparency change */
+        .icon-box:hover {
+            opacity: 0.8;
+        }
+
+        .icon-text {
+            color: #ffffff;
+            font-size: clamp(1.5rem, 5vw, 3rem); /* Scales based on screen size */
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1024px) {
+            .grid-container { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .grid-container { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        @media (max-width: 480px) {
+            .grid-container { 
+                grid-template-columns: repeat(2, 1fr);
+                width: 95%; 
+                gap: 10px;
+            }
+        }
+    </style>
 </head>
+<body>
+
+    <div class="grid-container">
+        <a href="secret-santa/" class="icon-box">
+            <span class="icon-text">1</span>
+        </a>
+
+        <a href="sub2/" class="icon-box">
+            <span class="icon-text">2</span>
+        </a>
+
+        <a href="sub3/" class="icon-box"><span class="icon-text">3</span></a>
+        <a href="sub4/" class="icon-box"><span class="icon-text">4</span></a>
+        <a href="sub5/" class="icon-box"><span class="icon-text">5</span></a>
+        <a href="sub6/" class="icon-box"><span class="icon-text">6</span></a>
+        <a href="sub7/" class="icon-box"><span class="icon-text">7</span></a>
+        <a href="sub8/" class="icon-box"><span class="icon-text">8</span></a>
+        <a href="sub9/" class="icon-box"><span class="icon-text">9</span></a>
+        <a href="sub10/" class="icon-box"><span class="icon-text">10</span></a>
+        <a href="sub11/" class="icon-box"><span class="icon-text">11</span></a>
+        <a href="sub12/" class="icon-box"><span class="icon-text">12</span></a>
+        <a href="sub13/" class="icon-box"><span class="icon-text">13</span></a>
+        <a href="sub14/" class="icon-box"><span class="icon-text">14</span></a>
+        <a href="sub15/" class="icon-box"><span class="icon-text">15</span></a>
+        <a href="sub16/" class="icon-box"><span class="icon-text">16</span></a>
+        <a href="sub17/" class="icon-box"><span class="icon-text">17</span></a>
+        <a href="sub18/" class="icon-box"><span class="icon-text">18</span></a>
+        <a href="sub19/" class="icon-box"><span class="icon-text">19</span></a>
+        <a href="sub20/" class="icon-box"><span class="icon-text">20</span></a>
+        <a href="sub21/" class="icon-box"><span class="icon-text">21</span></a>
+        <a href="sub22/" class="icon-box"><span class="icon-text">22</span></a>
+        <a href="sub23/" class="icon-box"><span class="icon-text">23</span></a>
+        <a href="sub24/" class="icon-box"><span class="icon-text">24</span></a>
+    </div>
+
+</body>
+</html>
