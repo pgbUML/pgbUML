@@ -1,1 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MA Higher Ed: Master Enrollment Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        h1 { color: #1e4261; margin-bottom: 20px; margin-top: 0; text-align: center; }
+        
+        /* THE DASHBOARD GRID */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Two equal columns for the top row */
+            gap: 20px;
+            width: 98%;
+            max-width: 1800px;
+            display: none; /* Hidden until an institution is selected */
+        }
 
+        /* PANEL STYLING */
+        .panel {
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
+            position: relative; /* Anchors the floating controls */
+        }
+        
+        .full-width {
+            grid-column: 1 / -1; /* Forces the table to span both columns */
+            max-height: 600px;
+            overflow-y: auto; /* Adds a scrollbar just for the table */
+        }
+        
+        h3 {
+            margin-top: 0; color: #555;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px; width: 100%; text-align: center;
+        }
+
+        /* THE FLOATING CONTROLS (Anchored inside the Map Panel) */
+        .controls {
+            position: absolute; 
+            top: 20px; right: 20px; 
+            z-index: 10; 
+            background: rgba(255, 255, 255, 0.95); 
+            padding: 10px; border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
+            width: 220px; text-align: center;
+        }
+        
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 12px; }
+        select {
+            font-size: 11px; padding: 4px; width: 100%; box-sizing: border-box;
+            border: 1px solid #ccc; border-radius: 3px; cursor: pointer; margin-bottom: 8px;
+        }
+        
+        .nav-buttons { display: flex; justify-content: space-between; gap: 6px; }
+        button {
+            flex: 1; padding: 4px 6px; font-size: 11px; font-weight: bold;
+            background-color: #2a5b84; color: white; border: none;
+            border-radius: 3px; cursor: pointer; transition: background-color 0.2s;
+        }
+        button:hover { background-color: #1e4261; }
+        
+        /* IMAGE & PLACEHOLDER STYLING */
+        img { max-width: 100%; height: auto; }
+        
+        #placeholder-screen {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 60vh; width: 100%;
+        }
+        
+        /* Large, centered initial control box */
+        .initial-controls {
+            background: white; padding: 30px; border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center;
+            width: 400px;
+        }
+        .initial-controls select { font-size: 16px; padding: 10px; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+    <h1>Master Pipeline & Enrollment Dashboard</h1>
+
+    <div id="placeholder-screen">
+        <div class="initial-controls">
+            <h2>Select an Institution</h2>
+            <p style="color: #666; font-size: 14px;">View actual enrollment distributions and projected demographic impacts.</p>
+            <select id="initial-select">
+                <option value="">-- Choose a Campus --</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="main-dashboard" class="dashboard-grid">
+        
+        <div class="panel" style="min-height: 500px;">
+            <h3>Current Enrollment Distribution (Zip Codes)</h3>
+            
+            <div class="controls">
+                <label for="ihe-select">Change Institution:</label>
+                <select id="ihe-select">
+                    <option value="">-- Choose a Campus --</option>
+                </select>
+                <div class="nav-buttons">
+                    <button id="btn-prev">⬅ Prev</button>
+                    <button id="btn-next">Next ➡</button>
+                </div>
+            </div>
+            
+            <img id="map-display" src="" alt="Enrollment Map">
+        </div>
+
+        <div class="panel">
+            <h3>Demographic Pipeline Projection (Top Municipalities)</h3>
+            <img id="chart-display" src="" alt="Projection Chart">
+        </div>
+
+        <div id="table-container" class="panel full-width">
+            <h3>Raw Pipeline Data</h3>
+            <img id="table-display" src="" alt="Data Table">
+        </div>
+        
+    </div>
+
+    <script>
+        const iheList = [
+            "Berkshire Community College", "Bristol Community College", "Bunker Hill Community College",
+            "Cape Cod Community College", "Greenfield Community College", "Holyoke Community College",
+            "Massasoit Community College", "MassBay Community College", "Middlesex Community College",
+            "Mount Wachusett Community College", "North Shore Community College", "Northern Essex Community College",
+            "Quinsigamond Community College", "Roxbury Community College", "Springfield Technical Community College",
+            "Bridgewater State University", "Fitchburg State University", "Framingham State University",
+            "Salem State University", "Westfield State University", "Worcester State University"
+        ];
+
+        const initialSelect = document.getElementById('initial-select');
+        const mainSelect = document.getElementById('ihe-select');
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+        
+        const mapDisplay = document.getElementById('map-display');
+        const chartDisplay = document.getElementById('chart-display');
+        const tableDisplay = document.getElementById('table-display');
+        
+        const dashboard = document.getElementById('main-dashboard');
+        const placeholder = document.getElementById('placeholder-screen');
+
+        // Populate both dropdowns
+        iheList.forEach(ihe => {
+            initialSelect.appendChild(new Option(ihe, ihe));
+            mainSelect.appendChild(new Option(ihe, ihe));
+        });
+
+        function updateDashboard(selectedValue) {
+            if (selectedValue) {
+                // Sync the dropdowns
+                initialSelect.value = selectedValue;
+                mainSelect.value = selectedValue;
+                
+                const baseFilename = selectedValue.split(' ').join('_');
+                
+                // Load all three images
+                mapDisplay.src = baseFilename + "_Enrollment_Map.svg";
+                chartDisplay.src = baseFilename + "_Projection_Chart.svg";
+                tableDisplay.src = baseFilename + "_Data_Table.svg";
+                
+                // Show the dashboard, hide the startup screen
+                dashboard.style.display = "grid";
+                placeholder.style.display = "none";
+            } else {
+                dashboard.style.display = "none";
+                placeholder.style.display = "flex";
+            }
+        }
+
+        // Event Listeners for Dropdowns
+        initialSelect.addEventListener('change', (e) => updateDashboard(e.target.value));
+        mainSelect.addEventListener('change', (e) => updateDashboard(e.target.value));
+
+        // Event Listeners for Buttons
+        btnNext.addEventListener('click', function() {
+            let currentIndex = mainSelect.selectedIndex;
+            mainSelect.selectedIndex = (currentIndex === mainSelect.options.length - 1) ? 1 : currentIndex + 1;
+            updateDashboard(mainSelect.value);
+        });
+
+        btnPrev.addEventListener('click', function() {
+            let currentIndex = mainSelect.selectedIndex;
+            mainSelect.selectedIndex = (currentIndex <= 1) ? mainSelect.options.length - 1 : currentIndex - 1;
+            updateDashboard(mainSelect.value);
+        });
+    </script>
+</body>
+</html>
