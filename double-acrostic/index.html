@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File List Viewer</title>
+    <style>
+        /* Basic layout: Top bar for controls, bottom area for the page */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            margin: 0; 
+            overflow: hidden;
+        }
+        #controls { 
+            padding: 15px; 
+            background: #2c3e50; 
+            color: white;
+            border-bottom: 1px solid #1a252f; 
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        #viewer-container { 
+            flex-grow: 1; 
+            background: #eee;
+        }
+        #viewer { 
+            width: 100%; 
+            height: 100%; 
+            border: none; 
+        }
+        select { 
+            padding: 8px; 
+            font-size: 14px; 
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            min-width: 250px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="controls">
+        <label for="filePicker">Select Project:</label>
+        <select id="filePicker">
+            <option>Loading list...</option>
+        </select>
+    </div>
+
+    <div id="viewer-container">
+        <iframe id="viewer" src="" title="Content Viewer"></iframe>
+    </div>
+
+    <script>
+        const filePicker = document.getElementById('filePicker');
+        const viewer = document.getElementById('viewer');
+
+        async function initViewer() {
+            try {
+                // 1. Fetch the text file
+                const response = await fetch('files.txt');
+                if (!response.ok) throw new Error('Could not find files.txt');
+                
+                const rawText = await response.text();
+
+                // 2. Process the text into an array
+                // Split by newlines, trim whitespace, and filter for files starting with '2'
+                const files = rawText.split('\n')
+                    .map(line => line.trim())
+                    .filter(line => line.startsWith('2') && line.endsWith('.html'));
+
+                if (files.length === 0) {
+                    filePicker.innerHTML = '<option>No matching files found</option>';
+                    return;
+                }
+
+                // 3. Populate the Dropdown
+                filePicker.innerHTML = ''; // Clear the "Loading" message
+                files.forEach(fileName => {
+                    const option = document.createElement('option');
+                    option.value = fileName;
+                    option.textContent = fileName;
+                    filePicker.appendChild(option);
+                });
+
+                // 4. Set the initial view to the first file in the list
+                viewer.src = files[0];
+
+            } catch (err) {
+                console.error('Error:', err);
+                filePicker.innerHTML = '<option>Error loading files.txt</option>';
+            }
+        }
+
+        // Update the iframe when the selection changes
+        filePicker.addEventListener('change', (e) => {
+            if (e.target.value) {
+                viewer.src = e.target.value;
+            }
+        });
+
+        initViewer();
+    </script>
+</body>
+</html>
