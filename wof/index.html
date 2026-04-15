@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wheel of Fortune</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+
+        #container {
+            display: flex;
+            gap: 50px;
+            align-items: center;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        /* Wheel Styling */
+        #wheel-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+        }
+
+        #wheel-svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(0deg);
+            transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
+        }
+
+        #pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0; 
+            height: 0; 
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid #e74c3c;
+            z-index: 10;
+        }
+
+        /* Controls Styling */
+        #controls {
+            text-align: center;
+            width: 250px;
+        }
+
+        #display-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+            min-height: 3.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            transition: background 0.2s;
+            box-shadow: 0 4px 0 #27ae60;
+        }
+
+        button:hover { background-color: #27ae60; }
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #27ae60;
+        }
+        button:disabled {
+            background-color: #bdc3c7;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+<div id="container">
+    <div id="wheel-container">
+        <div id="pointer"></div>
+        <svg id="wheel-svg" viewBox="0 0 100 100"></svg>
+    </div>
+
+    <div id="controls">
+        <div id="display-text">Spin the wheel!</div>
+        <button id="spin-button">SPIN</button>
+    </div>
+</div>
+
+<script>
+    const items = [
+        "Item 1", "Item 2", "Item 3", "Item 4", "Item 5", 
+        "Item 6", "Item 7", "Item 8", "Item 9", "Item 10", 
+        "Item 11", "Item 12", "Item 13", "Item 14"
+    ];
+
+    const wheel = document.getElementById('wheel-svg');
+    const btn = document.getElementById('spin-button');
+    const display = document.getElementById('display-text');
+    
+    const numSegments = items.length;
+    const degPerSeg = 360 / numSegments;
+    let currentRotation = 0;
+
+    // Create the SVG Wheel Segments
+    function createWheel() {
+        for (let i = 0; i < numSegments; i++) {
+            const angle = i * degPerSeg;
+            
+            // Create slice (path)
+            const x1 = 50 + 50 * Math.cos(Math.PI * (angle - 90) / 180);
+            const y1 = 50 + 50 * Math.sin(Math.PI * (angle - 90) / 180);
+            const x2 = 50 + 50 * Math.cos(Math.PI * (angle + degPerSeg - 90) / 180);
+            const y2 = 50 + 50 * Math.sin(Math.PI * (angle + degPerSeg - 90) / 180);
+            
+            const pathData = `M 50 50 L ${x1} ${y1} A 50 50 0 0 1 ${x2} ${y2} Z`;
+            
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("d", pathData);
+            path.setAttribute("fill", `hsl(${i * (360/numSegments)}, 70%, 60%)`);
+            path.setAttribute("stroke", "white");
+            path.setAttribute("stroke-width", "0.5");
+            wheel.appendChild(path);
+
+            // Add Number Text
+            const textAngle = angle + (degPerSeg / 2);
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            const radius = 35;
+            const tx = 50 + radius * Math.cos(Math.PI * (textAngle - 90) / 180);
+            const ty = 50 + radius * Math.sin(Math.PI * (textAngle - 90) / 180);
+            
+            text.setAttribute("x", tx);
+            text.setAttribute("y", ty);
+            text.setAttribute("fill", "white");
+            text.setAttribute("font-size", "5");
+            text.setAttribute("font-weight", "bold");
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("alignment-baseline", "middle");
+            text.setAttribute("transform", `rotate(${textAngle}, ${tx}, ${ty})`);
+            text.textContent = i + 1;
+            wheel.appendChild(text);
+        }
+    }
+
+    function spinWheel() {
+        btn.disabled = true;
+        display.textContent = "Spinning...";
+
+        // Logic: Randomly pick a segment
+        const randomIndex = Math.floor(Math.random() * numSegments);
+        
+        // Calculate rotation: 
+        // 1. Add multiple full circles (5-10) for effect
+        // 2. Subtract the angle of the target segment to align with the pointer at top (0 deg)
+        // 3. We subtract because CSS rotation is clockwise
+        const extraSpins = (Math.floor(Math.random() * 5) + 5) * 360;
+        const targetRotation = extraSpins + (randomIndex * degPerSeg);
+        
+        // Offset by half a segment so the pointer lands in the middle of the slice
+        currentRotation += targetRotation + (degPerSeg / 2);
+        
+        wheel.style.transform = `rotate(-${currentRotation}deg)`;
+
+        // Wait for animation to finish (4s)
+        setTimeout(() => {
+            btn.disabled = false;
+            // The items array index matches our segment math
+            display.textContent = items[randomIndex];
+        }, 4000);
+    }
+
+    btn.addEventListener('click', spinWheel);
+    createWheel();
+</script>
+
+</body>
+</html>
