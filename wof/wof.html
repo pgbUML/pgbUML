@@ -5,81 +5,104 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wheel O' Fun</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f2f5;
-        }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
+        background-color: #f0f2f5;
+        padding: 20px;
+    }
 
+    #container {
+        display: flex;
+        flex-direction: row; /* Default: horizontal for desktop */
+        gap: 40px;
+        align-items: center;
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        max-width: 900px;
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Mobile Responsive Logic */
+    @media (max-width: 768px) {
         #container {
-            display: flex;
-            gap: 50px;
-            align-items: center;
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            flex-direction: column-reverse; /* Stacks vertically, Div 2 on TOP */
+            gap: 20px;
+            padding: 20px;
         }
 
         #wheel-container {
-            position: relative;
-            width: 400px;
-            height: 400px;
+            width: 300px !important; /* Scale down for mobile */
+            height: 300px !important;
         }
+    }
 
-        #wheel-svg {
-            width: 100%;
-            height: 100%;
-            /* Smooth deceleration */
-            transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
-        }
+    #wheel-container {
+        position: relative;
+        width: 400px;
+        height: 400px;
+        flex-shrink: 0; /* Prevents the wheel from squishing */
+    }
 
-        /* Pointer at the TOP (12 o'clock) */
-        #pointer {
-            position: absolute;
-            top: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0; 
-            height: 0; 
-            border-left: 15px solid transparent;
-            border-right: 15px solid transparent;
-            border-top: 30px solid #e74c3c;
-            z-index: 10;
-            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
-        }
+    #wheel-svg {
+        width: 100%;
+        height: 100%;
+        transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
+    }
 
-        #controls { text-align: center; width: 250px; }
-        #display-text {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #333;
-            min-height: 3.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+    #pointer {
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0; 
+        height: 0; 
+        border-left: 15px solid transparent;
+        border-right: 15px solid transparent;
+        border-top: 30px solid #e74c3c;
+        z-index: 10;
+    }
 
-        button {
-            padding: 12px 30px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 50px;
-            box-shadow: 0 4px 0 #2980b9;
-        }
+    #controls { 
+        text-align: center; 
+        width: 100%;
+        max-width: 300px;
+    }
 
-        button:active { transform: translateY(2px); box-shadow: 0 2px 0 #2980b9; }
-        button:disabled { background-color: #bdc3c7; box-shadow: none; }
-    </style>
+    #display-text {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #333;
+        min-height: 3.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1.2;
+    }
+
+    button {
+        padding: 15px 40px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 50px;
+        box-shadow: 0 4px 0 #2980b9;
+        width: 100%; /* Full width button on mobile feels better */
+    }
+
+    button:active { transform: translateY(2px); box-shadow: 0 2px 0 #2980b9; }
+    button:disabled { background-color: #bdc3c7; box-shadow: none; }
+</style>
 </head>
 <body>
 
