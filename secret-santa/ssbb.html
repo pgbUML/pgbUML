@@ -3,82 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>260417_Secret Santa - App</title>
+    <title>Secret Santa - App</title>
     <style>
         /* --- BASE STYLES --- */
         body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            touch-action: manipulation; 
+            font-family: 'Futura', Arial, sans-serif;
+            margin: 20px 0;
+            background-color: #fff;
             display: flex;
-            justify-content: space-between;
-            gap: 20px;
+            justify-content: center; /* Centers the 80% container */
+            touch-action: manipulation; 
         }
 
-        /* Left Side: The Rows */
+        .app-container {
+            width: 80%;
+            max-width: 1600px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        /* --- THE BOARD (ROWS) --- */
         .board {
             display: flex;
             flex-direction: column;
             gap: 10px;
-            flex: 1; /* Takes up remaining space on desktop */
+            max-height: 450px; /* Forces a scrollbar if we get past ~6 rows */
+            overflow-y: auto;
+            padding: 10px 5px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fcfcfc;
         }
 
         .row {
             display: flex;
             gap: 10px;
+            width: 100%;
         }
 
         .slot {
-            min-width: 90px; /* Prevent shrinking */
-            height: 40px;
+            flex: 1; /* Makes all 13 columns share space equally */
+            height: 55px;
             border: 2px solid red;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 18px;
+            font-size: 20px;
             color: black;
             box-sizing: border-box;
+            position: relative; /* Allows absolute positioning for checkmarks */
+            min-width: 0; /* Prevents overflow issues */
         }
 
+        /* Phase 1 Top Row Dark Green */
+        #topRow .slot.filled {
+            background-color: #377723; 
+            color: white; 
+            border: 1px solid black;
+        }
+
+        /* Phase 2/3 Guess Rows */
         .slot.filled {
             background-color: #90d87a; 
             border: 1px solid black;
         }
 
         .slot.correct-guess {
-            border: 4px solid red !important;
+            border: 4px solid #1E5610 !important; /* Dark Green Border */
             background-color: #90d87a;
         }
 
         .slot.incorrect-guess {
-            background-color: #e0e0e0;
-            color: #888;
+            background-color: #d3d3d3; /* Gray background */
+            color: #444; /* Dark gray text, no strikethrough */
             border: 1px solid #aaa;
-            text-decoration: line-through;
         }
 
         .slot.review-active {
-            box-shadow: 0 0 10px 4px #ffd700; 
+            box-shadow: 0 0 12px 4px #ffd700; 
+            z-index: 10;
         }
 
-        /* Right Side: Controls and Grid */
-        .sidebar {
-            width: 400px;
+        /* Checkmarks and Xs */
+        .mark {
+            position: absolute;
+            top: 2px;
+            right: 4px;
+            font-size: 22px;
+            font-weight: bold;
+        }
+        .mark-check { color: #1E5610; } /* Dark Green */
+        .mark-x { color: #C62828; } /* Dark Red */
+
+
+        /* --- LOWER PANEL (SIDE-BY-SIDE) --- */
+        .lower-panel {
+            display: flex;
+            width: 100%;
+            gap: 40px;
+        }
+
+        .lower-left {
+            flex: 1;
             display: flex;
             flex-direction: column;
-            align-items: flex-end;
-            flex-shrink: 0; /* Prevents sidebar from squishing on desktop */
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .lower-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* UI Containers */
+        #phase2UI, #phase3UI {
+            display: none;
+            width: 100%;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f9f9f9;
+            padding: 30px 20px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+        }
+
+        .now-guessing-label { 
+            font-size: 32px; /* Scaled up */
+            margin-bottom: 15px; 
+        }
+        
+        .large-name-box {
+            width: 100%;
+            max-width: 400px;
+            height: 100px; /* Scaled up */
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 44px; /* Scaled up */
+            font-weight: bold;
+            border: 2px solid black;
+            margin-bottom: 20px;
+        }
+
+        /* Grid */
+        .names-header {
+            width: 100%;
+            text-align: left;
+            margin-bottom: 15px;
+            font-size: 28px; /* Scaled up */
+        }
+
+        .names-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            width: 100%;
+        }
+
+        .name-btn {
+            width: 100%;
+            height: 80px; /* Scaled up ~2x */
+            background-color: #90d87a;
+            border: 1px solid transparent;
+            font-size: 28px; /* Scaled up */
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none; 
+        }
+
+        .name-btn.used {
+            background-color: #f2f2f2;
+            color: #ccc;
+            cursor: default;
+            pointer-events: none; 
         }
 
         /* Buttons */
+        .controls-bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
         .action-btn {
-            padding: 10px 20px;
-            font-size: 16px;
+            padding: 12px 24px;
+            font-size: 18px;
             font-weight: bold;
             border-radius: 5px;
             cursor: pointer;
-            margin-bottom: 20px;
         }
 
         #undoBtn { background-color: #ffcccc; border: 2px solid red; }
@@ -98,84 +220,19 @@
         }
 
         .eval-btn {
-            padding: 15px 30px;
-            font-size: 20px;
+            padding: 20px 30px;
+            font-size: 24px;
             font-weight: bold;
             border-radius: 8px;
             cursor: pointer;
             margin: 10px;
             color: white;
-            flex: 1; /* Makes review buttons even width */
+            flex: 1; 
         }
         #btnCorrect { background-color: #4CAF50; border: 2px solid #2E7D32; }
         #btnIncorrect { background-color: #F44336; border: 2px solid #C62828; }
 
-        /* Grid */
-        .names-header {
-            width: 100%;
-            text-align: left;
-            margin-bottom: 10px;
-            font-size: 20px;
-        }
-
-        .names-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
-            width: 100%;
-        }
-
-        .name-btn {
-            width: 100%;
-            height: 50px;
-            background-color: #90d87a;
-            border: 1px solid transparent;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            user-select: none; 
-        }
-
-        .name-btn.used {
-            background-color: #f2f2f2;
-            color: #ccc;
-            cursor: default;
-            pointer-events: none; 
-        }
-
-        /* UI Containers */
-        #phase2UI, #phase3UI {
-            display: none;
-            width: 100%;
-            flex-direction: column;
-            align-items: center;
-            background-color: #f9f9f9;
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #ddd;
-            box-sizing: border-box;
-        }
-
-        .now-guessing-label { font-size: 20px; margin-bottom: 10px; }
-        
-        .large-name-box {
-            width: 100%;
-            max-width: 250px;
-            height: 60px;
-            background-color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            font-weight: bold;
-            border: 2px solid black;
-            margin-bottom: 20px;
-        }
-
+        /* Game Over Modal */
         #gameOverModal {
             display: none; 
             position: fixed;
@@ -198,78 +255,57 @@
             text-align: center;
             color: white;
             box-shadow: 0px 10px 30px rgba(0,0,0,0.5);
-            max-width: 80%;
         }
 
-        /* --- RESPONSIVE MOBILE STYLES --- */
-        @media (max-width: 850px) {
-            body {
-                flex-direction: column; /* Stack top to bottom instead of left to right */
-                margin: 15px; /* Smaller margins for phone screen */
-                align-items: center;
-            }
-
-            .sidebar {
-                width: 100%; /* Take full width of phone */
-                order: -1; /* This forces the sidebar to appear ABOVE the board */
-                align-items: center; /* Center contents */
-            }
-
-            .names-header {
-                text-align: center;
-            }
-
-            .board {
-                width: 100%;
-                overflow-x: auto; /* Allows horizontal scrolling of the 13 columns */
-                padding-bottom: 20px;
-            }
-
-            .row {
-                width: max-content; /* Forces the row to stretch beyond screen width to allow scrolling */
-            }
-
-            .game-over-content h1 {
-                font-size: 32px;
-            }
-            .game-over-content p {
-                font-size: 18px;
-            }
+        /* Mobile Adjustments */
+        @media (max-width: 950px) {
+            .app-container { width: 95%; }
+            .lower-panel { flex-direction: column; }
+            .board { overflow-x: auto; }
+            .row { width: max-content; }
         }
     </style>
 </head>
 <body>
 
-    <div class="board">
-        <div class="row" id="topRow"></div>
-        <div class="row" id="guessRow" style="display: none;"></div>
-    </div>
-
-    <div class="sidebar">
-        <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
-            <button id="undoBtn" class="action-btn" disabled>Undo</button>
-            <button id="startGuessingBtn" class="action-btn">Start Guessing Phase!</button>
-            <button id="startReviewBtn" class="action-btn">Start Review!</button>
-            <button id="nextRoundBtn" class="action-btn">Start Next Round</button>
-        </div>
-
-        <div class="names-header" id="gridHeader"></div>
-        <div class="names-grid" id="namesGrid"></div>
-
-        <div id="phase2UI">
-            <div class="now-guessing-label">Now guessing:</div>
-            <div class="large-name-box" id="currentGuesserDisplay" style="background-color: #90d87a;"></div>
-        </div>
-
-        <div id="phase3UI">
-            <div class="now-guessing-label" style="text-align: center;">
-                Reviewing <strong id="reviewGuesserName"></strong>'s guess:
+    <div class="app-container">
+        
+        <div class="board" id="board">
+            <div class="row" id="topRow"></div>
             </div>
-            <div class="large-name-box" id="reviewGuessName"></div>
-            <div style="display: flex; gap: 10px; width: 100%;">
-                <button id="btnCorrect" class="eval-btn">✔ Correct</button>
-                <button id="btnIncorrect" class="eval-btn">✖ Incorrect</button>
+
+        <div class="lower-panel">
+            
+            <div class="lower-left">
+                <div id="phase2UI">
+                    <div class="now-guessing-label">Now guessing:</div>
+                    <div class="large-name-box" id="currentGuesserDisplay" style="background-color: #90d87a;"></div>
+                </div>
+
+                <div id="phase3UI">
+                    <div class="now-guessing-label" style="text-align: center;">
+                        Reviewing <strong id="reviewGuesserName"></strong>'s guess:
+                    </div>
+                    <div class="large-name-box" id="reviewGuessName"></div>
+                    <div style="display: flex; gap: 10px; width: 100%;">
+                        <button id="btnCorrect" class="eval-btn">✔ Correct</button>
+                        <button id="btnIncorrect" class="eval-btn">✖ Incorrect</button>
+                    </div>
+                </div>
             </div>
+
+            <div class="lower-right">
+                <div class="controls-bar">
+                    <button id="undoBtn" class="action-btn" disabled>Undo</button>
+                    <button id="startGuessingBtn" class="action-btn">Start Guess Phase 1</button>
+                    <button id="startReviewBtn" class="action-btn">Start Review!</button>
+                    <button id="nextRoundBtn" class="action-btn">Start Next Round</button>
+                </div>
+
+                <div class="names-header" id="gridHeader">Available names:</div>
+                <div class="names-grid" id="namesGrid"></div>
+            </div>
+
         </div>
     </div>
 
@@ -290,13 +326,16 @@
         ];
 
         let currentPhase = 1;
-        let roundNumber = 1;
+        let roundNumber = 1; // Tracks which guess row we are on
+        
         let currentSlotIndex = 0;
         let drawnOrder = []; 
         let phase1History = [];
+
         let currentGuesserIndex = 0;
         let currentRoundGuesses = []; 
         let phase2History = [];
+
         let reviewIndex = 0;
         let correctlyGuessed = []; 
         let successfulGuessers = []; 
@@ -304,22 +343,19 @@
         names.forEach(n => guessHistory[n] = []);
 
         const topRow = document.getElementById('topRow');
-        const guessRow = document.getElementById('guessRow');
+        const board = document.getElementById('board');
         const namesGrid = document.getElementById('namesGrid');
         const undoBtn = document.getElementById('undoBtn');
         
+        // 1. Initialize Top Row
         for(let i = 0; i < 13; i++) {
             let tSlot = document.createElement('div');
             tSlot.className = 'slot';
             tSlot.id = 'top-slot-' + i;
             topRow.appendChild(tSlot);
-
-            let gSlot = document.createElement('div');
-            gSlot.className = 'slot';
-            gSlot.id = 'guess-slot-' + i;
-            guessRow.appendChild(gSlot);
         }
 
+        // 2. Initialize Name Grid
         names.forEach(name => {
             let btn = document.createElement('div');
             btn.className = 'name-btn';
@@ -329,6 +365,32 @@
             namesGrid.appendChild(btn);
         });
 
+        // Helper to dynamically generate a new row of guess boxes
+        function createGuessRow(rNum) {
+            let row = document.createElement('div');
+            row.className = 'row';
+            row.id = 'guess-row-' + rNum;
+            
+            for(let i = 0; i < 13; i++) {
+                let slot = document.createElement('div');
+                slot.className = 'slot';
+                slot.id = `guess-slot-${rNum}-${i}`;
+                
+                // If they already won in a previous round, pre-fill the checkmark
+                if (successfulGuessers.includes(drawnOrder[i])) {
+                    slot.classList.add('correct-guess');
+                    slot.innerHTML = `<span>${drawnOrder[i]}</span><span class="mark mark-check">✔</span>`;
+                }
+                
+                row.appendChild(slot);
+            }
+            board.appendChild(row);
+
+            // Auto-scroll the board to the bottom so the new row is visible
+            board.scrollTop = board.scrollHeight;
+        }
+
+        // 3. Click Handling logic
         function handleNameClick() {
             if (this.classList.contains('used')) return;
             const name = this.dataset.name;
@@ -347,7 +409,7 @@
                 if (currentSlotIndex === 13) document.getElementById('startGuessingBtn').style.display = 'block';
             } 
             else if (currentPhase === 2 && currentGuesserIndex < 13) {
-                let guessSlot = document.getElementById('guess-slot-' + currentGuesserIndex);
+                let guessSlot = document.getElementById(`guess-slot-${roundNumber}-${currentGuesserIndex}`);
                 guessSlot.innerText = name;
                 guessSlot.classList.add('filled');
                 currentRoundGuesses[currentGuesserIndex] = name;
@@ -376,6 +438,7 @@
             }
         }
 
+        // 4. Undo Logic
         undoBtn.addEventListener('click', function() {
             if (currentPhase === 1 && phase1History.length > 0) {
                 currentSlotIndex--;
@@ -395,7 +458,7 @@
                     currentGuesserIndex--;
                 } while (currentGuesserIndex >= 0 && successfulGuessers.includes(drawnOrder[currentGuesserIndex]));
 
-                let guessSlot = document.getElementById('guess-slot-' + currentGuesserIndex);
+                let guessSlot = document.getElementById(`guess-slot-${roundNumber}-${currentGuesserIndex}`);
                 guessSlot.innerText = '';
                 guessSlot.classList.remove('filled');
                 currentRoundGuesses[currentGuesserIndex] = null;
@@ -407,14 +470,17 @@
             }
         });
 
+        // 5. Phase Transitions
         document.getElementById('startGuessingBtn').addEventListener('click', function() {
             currentPhase = 2;
             this.style.display = 'none';
             undoBtn.disabled = true; 
-            document.getElementById('gridHeader').innerText = "Available names:";
-            guessRow.style.display = 'flex';
+            
             document.getElementById('phase2UI').style.display = 'flex';
             
+            // Create the very first guessing row
+            createGuessRow(roundNumber);
+
             if(successfulGuessers.includes(drawnOrder[0])) {
                 currentGuesserIndex = -1; 
                 advanceToNextValidGuesser();
@@ -439,21 +505,12 @@
             phase2History = [];
 
             this.style.display = 'none';
-
-            for(let i = 0; i < 13; i++) {
-                let slot = document.getElementById('guess-slot-' + i);
-                if (successfulGuessers.includes(drawnOrder[i])) {
-                    slot.innerText = '✔';
-                    slot.className = 'slot correct-guess'; 
-                } else {
-                    slot.innerText = '';
-                    slot.className = 'slot'; 
-                }
-            }
-
             document.getElementById('namesGrid').style.display = 'grid';
             document.getElementById('gridHeader').style.display = 'block';
             document.getElementById('phase2UI').style.display = 'flex';
+
+            // Generate a brand new row appended to the bottom
+            createGuessRow(roundNumber);
 
             if(successfulGuessers.includes(drawnOrder[0])) {
                 currentGuesserIndex = -1; 
@@ -463,6 +520,7 @@
             }
         });
 
+        // 6. State Setup Helpers
         function setupNextGuesser() {
             let currentGuesser = drawnOrder[currentGuesserIndex];
             document.getElementById('currentGuesserDisplay').innerText = currentGuesser;
@@ -490,25 +548,28 @@
                 return;
             }
 
+            // Remove highlight from previous slots
             for(let i=0; i<13; i++) {
                 document.getElementById('top-slot-' + i).classList.remove('review-active');
-                document.getElementById('guess-slot-' + i).classList.remove('review-active');
+                let slot = document.getElementById(`guess-slot-${roundNumber}-${i}`);
+                if(slot) slot.classList.remove('review-active');
             }
 
+            // Add highlight
             document.getElementById('top-slot-' + reviewIndex).classList.add('review-active');
-            document.getElementById('guess-slot-' + reviewIndex).classList.add('review-active');
-
-            // Scroll the active column into view on mobile
-            document.getElementById('top-slot-' + reviewIndex).scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            document.getElementById(`guess-slot-${roundNumber}-${reviewIndex}`).classList.add('review-active');
 
             document.getElementById('reviewGuesserName').innerText = drawnOrder[reviewIndex];
             document.getElementById('reviewGuessName').innerText = currentRoundGuesses[reviewIndex];
         }
 
         function evaluateGuess(isCorrect) {
-            let guessSlot = document.getElementById('guess-slot-' + reviewIndex);
+            let guessSlot = document.getElementById(`guess-slot-${roundNumber}-${reviewIndex}`);
             let guesser = drawnOrder[reviewIndex];
             let guess = currentRoundGuesses[reviewIndex];
+
+            // Inject the mark and styling based on right/wrong
+            guessSlot.innerHTML = `<span>${guess}</span><span class="mark ${isCorrect ? 'mark-check' : 'mark-x'}">${isCorrect ? '✔' : '✖'}</span>`;
 
             if (isCorrect) {
                 guessSlot.classList.add('correct-guess');
@@ -526,7 +587,8 @@
         function finishReviewPhase() {
             for(let i=0; i<13; i++) {
                 document.getElementById('top-slot-' + i).classList.remove('review-active');
-                document.getElementById('guess-slot-' + i).classList.remove('review-active');
+                let slot = document.getElementById(`guess-slot-${roundNumber}-${i}`);
+                if(slot) slot.classList.remove('review-active');
             }
             document.getElementById('phase3UI').style.display = 'none';
             
