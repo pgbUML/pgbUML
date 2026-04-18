@@ -2,513 +2,93 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Double Crostic Puzzle</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f9f9f9;
-    margin: 20px;
+  :root { --highlight: #fffdcc; --active: #b3e5fc; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f4f9; margin: 10px; }
+  table { border-collapse: collapse; margin: 10px auto; background: white; table-layout: fixed; }
+  td { width: 30px; height: 35px; border: 1px solid #999; text-align: center; vertical-align: middle; position: relative; padding: 0; }
+  .black { background: #333; }
+  .num, .smallnum { position: absolute; top: 1px; left: 2px; font-size: 9px; color: #666; pointer-events: none; }
+  input { 
+    width: 100%; height: 100%; border: none; outline: none; text-align: center; 
+    font-size: 18px; font-weight: bold; text-transform: uppercase; background: transparent; 
   }
-  table {
-    border-collapse: collapse;
-    margin: 10px auto;
-  }
-  td {
-    width: 25px; height: 25px;
-    border: 1px solid #555;
-    text-align: center;
-    vertical-align: middle;
-    position: relative;
-  }
-  .black { background: #000; }
-  .num, .smallnum {
-    position: absolute;
-    top: 2px; left: 2px;
-    font-size: 40%;
-    color: #333;
-  }
-  .link-highlight { background: #fffdcc !important; }
-  input {
-    width: 100%;
-    height: 100%;
-    text-align: center;
-    border: none;
-    outline: none;
-    font-size: 16px;
-    text-transform: uppercase;
-    background: transparent;
-  }
-
-  /* --- Header --- */
-  .header {
-    text-align: center;
-    margin-bottom: 30px;
-  }
-  .header h1 {
-    font-size: 22px;
-    margin-bottom: 4px;
-  }
-  .header p {
-    margin: 0;
-    font-size: 14px;
-    color: #333;
-  }
-
-  /* --- Answer grid layout --- */
-  .answers-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr 2fr 1fr; /* clues1, answers1, clues2, answers2 */
-    column-gap: 20px;
-    row-gap: 8px;
-    margin-top: 40px;
-    justify-items: stretch;
-    align-items: center;
-    font-family: Arial, sans-serif;
-  }
-
-  .clue-text {
-    font-size: 13px;
-    text-align: right;
-    padding-right: 6px;
-    word-wrap: break-word;
-    overflow-wrap: anywhere;
-    white-space: normal;
-  }
-
-  .answer-table table {
-    border-collapse: collapse;
-  }
-
-  .answer-table td {
-    width: 25px;
-    height: 25px;
-    border: 1px solid #555;
-    text-align: center;
-    vertical-align: middle;
-    position: relative;
-  }
-
-  .answer-table .smallnum {
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    font-size: 40%;
-    color: #333;
-  }
-
-  /* --- Print styling --- */
-  @media print {
-    body {
-      background: white;
-      color: black;
-    }
-    input {
-      border: none;
-      color: black;
-    }
-    .clue-text {
-      font-size: 12px;
-    }
-    .header h1 {
-      font-size: 20px;
-    }
-    .header p {
-      font-size: 12px;
-    }
+  .link-highlight { background: var(--highlight); }
+  .header { text-align: center; margin-bottom: 20px; }
+  .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; max-width: 1000px; margin: 20px auto; }
+  .clue-row { display: flex; align-items: center; margin-bottom: 8px; }
+  .clue-text { flex: 1; font-size: 14px; padding-right: 10px; text-align: right; }
+  #answer-viewer { display: none; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+  .nav-buttons { display: flex; justify-content: space-between; margin-top: 15px; }
+  .nav-buttons button { padding: 10px 15px; background: #007bff; color: white; border: none; border-radius: 5px; }
+  @media (max-width: 768px) {
+    .answers-grid { display: none; }
+    #answer-viewer { display: block; }
   }
 </style>
 </head>
 <body>
-
 <div class="header">
-  <h1>Double Crostic Puzzle</h1>
-  <p><strong>Date:</strong> December 24, 2025</p>
-  <p>Type letters in either grid — both update automatically. Match the clues to reveal the hidden quotation.</p>
-  <p>Don't refresh the page: we don't have any 'save' functionality. Refresh will clear everything!</p>
+  <h1>Double Crostic</h1>
+  <p><strong>April 18, 2026</strong></p>
+  <button id="clearBtn">Clear Progress</button>
 </div>
-
-<h2>Puzzle Grid</h2>
-<table id="puzzle">
-  <tr>
-    <td data-link="L1"><div class="num">1</div><input maxlength="1"></td>
-    <td data-link="L2"><div class="num">2</div><input maxlength="1"></td>
-    <td data-link="L3"><div class="num">3</div><input maxlength="1"></td>
-    <td data-link="L4"><div class="num">4</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L5"><div class="num">5</div><input maxlength="1"></td>
-    <td data-link="L6"><div class="num">6</div><input maxlength="1"></td>
-    <td data-link="L7"><div class="num">7</div><input maxlength="1"></td>
-    <td data-link="L8"><div class="num">8</div><input maxlength="1"></td>
-    <td data-link="L9"><div class="num">9</div><input maxlength="1"></td>
-    <td data-link="L10"><div class="num">10</div><input maxlength="1"></td>
-    <td data-link="L11"><div class="num">11</div><input maxlength="1"></td>
-    <td data-link="L12"><div class="num">12</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L13"><div class="num">13</div><input maxlength="1"></td>
-    <td data-link="L14"><div class="num">14</div><input maxlength="1"></td>
-    <td data-link="L15"><div class="num">15</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L16"><div class="num">16</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L17"><div class="num">17</div><input maxlength="1"></td>
-    <td data-link="L18"><div class="num">18</div><input maxlength="1"></td>
-    <td data-link="L19"><div class="num">19</div><input maxlength="1"></td>
-    <td data-link="L20"><div class="num">20</div><input maxlength="1"></td>
-    <td data-link="L21"><div class="num">21</div><input maxlength="1"></td>
-    <td data-link="L22"><div class="num">22</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L23"><div class="num">23</div><input maxlength="1"></td>
-    <td data-link="L24"><div class="num">24</div><input maxlength="1"></td>
-    <td data-link="L25"><div class="num">25</div><input maxlength="1"></td>
-    <td data-link="L26"><div class="num">26</div><input maxlength="1"></td>
-    <td data-link="L27"><div class="num">27</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L28"><div class="num">28</div><input maxlength="1"></td>
-    <td data-link="L29"><div class="num">29</div><input maxlength="1"></td>
-  </tr>
-  <tr>
-    <td data-link="L30"><div class="num">30</div><input maxlength="1"></td>
-    <td data-link="L31"><div class="num">31</div><input maxlength="1"></td>
-    <td data-link="L32"><div class="num">32</div><input maxlength="1"></td>
-    <td data-link="L33"><div class="num">33</div><input maxlength="1"></td>
-    <td data-link="L34"><div class="num">34</div><input maxlength="1"></td>
-    <td data-link="L35"><div class="num">35</div><input maxlength="1"></td>
-    <td data-link="L36"><div class="num">36</div><input maxlength="1"></td>
-    <td data-link="L37"><div class="num">37</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L38"><div class="num">38</div><input maxlength="1"></td>
-    <td data-link="L39"><div class="num">39</div><input maxlength="1"></td>
-    <td data-link="L40"><div class="num">40</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L41"><div class="num">41</div><input maxlength="1"></td>
-    <td data-link="L42"><div class="num">42</div><input maxlength="1"></td>
-    <td data-link="L43"><div class="num">43</div><input maxlength="1"></td>
-    <td data-link="L44"><div class="num">44</div><input maxlength="1"></td>
-    <td data-link="L45"><div class="num">45</div><input maxlength="1"></td>
-    <td data-link="L46"><div class="num">46</div><input maxlength="1"></td>
-    <td data-link="L47"><div class="num">47</div><input maxlength="1"></td>
-    <td data-link="L48"><div class="num">48</div><input maxlength="1"></td>
-    <td data-link="L49"><div class="num">49</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L50"><div class="num">50</div><input maxlength="1"></td>
-    <td data-link="L51"><div class="num">51</div><input maxlength="1"></td>
-    <td data-link="L52"><div class="num">52</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L53"><div class="num">53</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L54"><div class="num">54</div><input maxlength="1"></td>
-    <td data-link="L55"><div class="num">55</div><input maxlength="1"></td>
-    <td data-link="L56"><div class="num">56</div><input maxlength="1"></td>
-    <td data-link="L57"><div class="num">57</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L58"><div class="num">58</div><input maxlength="1"></td>
-  </tr>
-  <tr>
-    <td data-link="L59"><div class="num">59</div><input maxlength="1"></td>
-    <td data-link="L60"><div class="num">60</div><input maxlength="1"></td>
-    <td data-link="L61"><div class="num">61</div><input maxlength="1"></td>
-    <td data-link="L62"><div class="num">62</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L63"><div class="num">63</div><input maxlength="1"></td>
-    <td data-link="L64"><div class="num">64</div><input maxlength="1"></td>
-    <td data-link="L65"><div class="num">65</div><input maxlength="1"></td>
-    <td data-link="L66"><div class="num">66</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L67"><div class="num">67</div><input maxlength="1"></td>
-    <td data-link="L68"><div class="num">68</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L69"><div class="num">69</div><input maxlength="1"></td>
-    <td data-link="L70"><div class="num">70</div><input maxlength="1"></td>
-    <td data-link="L71"><div class="num">71</div><input maxlength="1"></td>
-    <td data-link="L72"><div class="num">72</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L73"><div class="num">73</div><input maxlength="1"></td>
-    <td data-link="L74"><div class="num">74</div><input maxlength="1"></td>
-    <td data-link="L75"><div class="num">75</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L76"><div class="num">76</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L77"><div class="num">77</div><input maxlength="1"></td>
-    <td data-link="L78"><div class="num">78</div><input maxlength="1"></td>
-    <td data-link="L79"><div class="num">79</div><input maxlength="1"></td>
-    <td data-link="L80"><div class="num">80</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L81"><div class="num">81</div><input maxlength="1"></td>
-    <td data-link="L82"><div class="num">82</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L83"><div class="num">83</div><input maxlength="1"></td>
-    <td data-link="L84"><div class="num">84</div><input maxlength="1"></td>
-    <td data-link="L85"><div class="num">85</div><input maxlength="1"></td>
-  </tr>
-  <tr>
-    <td data-link="L86"><div class="num">86</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L87"><div class="num">87</div><input maxlength="1"></td>
-    <td data-link="L88"><div class="num">88</div><input maxlength="1"></td>
-    <td data-link="L89"><div class="num">89</div><input maxlength="1"></td>
-    <td data-link="L90"><div class="num">90</div><input maxlength="1"></td>
-    <td data-link="L91"><div class="num">91</div><input maxlength="1"></td>
-    <td data-link="L92"><div class="num">92</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L93"><div class="num">93</div><input maxlength="1"></td>
-    <td data-link="L94"><div class="num">94</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L95"><div class="num">95</div><input maxlength="1"></td>
-    <td data-link="L96"><div class="num">96</div><input maxlength="1"></td>
-    <td data-link="L97"><div class="num">97</div><input maxlength="1"></td>
-    <td data-link="L98"><div class="num">98</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L99"><div class="num">99</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L100"><div class="num">100</div><input maxlength="1"></td>
-    <td data-link="L101"><div class="num">101</div><input maxlength="1"></td>
-    <td data-link="L102"><div class="num">102</div><input maxlength="1"></td>
-    <td data-link="L103"><div class="num">103</div><input maxlength="1"></td>
-    <td data-link="L104"><div class="num">104</div><input maxlength="1"></td>
-    <td data-link="L105"><div class="num">105</div><input maxlength="1"></td>
-    <td data-link="L106"><div class="num">106</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L107"><div class="num">107</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L108"><div class="num">108</div><input maxlength="1"></td>
-    <td data-link="L109"><div class="num">109</div><input maxlength="1"></td>
-    <td data-link="L110"><div class="num">110</div><input maxlength="1"></td>
-    <td data-link="L111"><div class="num">111</div><input maxlength="1"></td>
-    <td data-link="L112"><div class="num">112</div><input maxlength="1"></td>
-    <td data-link="L113"><div class="num">113</div><input maxlength="1"></td>
-  </tr>
-  <tr>
-    <td class="black"></td>
-    <td data-link="L114"><div class="num">114</div><input maxlength="1"></td>
-    <td data-link="L115"><div class="num">115</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L116"><div class="num">116</div><input maxlength="1"></td>
-    <td data-link="L117"><div class="num">117</div><input maxlength="1"></td>
-    <td data-link="L118"><div class="num">118</div><input maxlength="1"></td>
-    <td data-link="L119"><div class="num">119</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L120"><div class="num">120</div><input maxlength="1"></td>
-    <td data-link="L121"><div class="num">121</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L122"><div class="num">122</div><input maxlength="1"></td>
-    <td data-link="L123"><div class="num">123</div><input maxlength="1"></td>
-    <td data-link="L124"><div class="num">124</div><input maxlength="1"></td>
-    <td data-link="L125"><div class="num">125</div><input maxlength="1"></td>
-    <td data-link="L126"><div class="num">126</div><input maxlength="1"></td>
-    <td data-link="L127"><div class="num">127</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L128"><div class="num">128</div><input maxlength="1"></td>
-    <td data-link="L129"><div class="num">129</div><input maxlength="1"></td>
-    <td data-link="L130"><div class="num">130</div><input maxlength="1"></td>
-    <td data-link="L131"><div class="num">131</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L132"><div class="num">132</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L133"><div class="num">133</div><input maxlength="1"></td>
-    <td data-link="L134"><div class="num">134</div><input maxlength="1"></td>
-    <td data-link="L135"><div class="num">135</div><input maxlength="1"></td>
-    <td data-link="L136"><div class="num">136</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L137"><div class="num">137</div><input maxlength="1"></td>
-    <td data-link="L138"><div class="num">138</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L139"><div class="num">139</div><input maxlength="1"></td>
-  </tr>
-  <tr>
-    <td data-link="L140"><div class="num">140</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L141"><div class="num">141</div><input maxlength="1"></td>
-    <td data-link="L142"><div class="num">142</div><input maxlength="1"></td>
-    <td data-link="L143"><div class="num">143</div><input maxlength="1"></td>
-    <td data-link="L144"><div class="num">144</div><input maxlength="1"></td>
-    <td data-link="L145"><div class="num">145</div><input maxlength="1"></td>
-    <td data-link="L146"><div class="num">146</div><input maxlength="1"></td>
-    <td data-link="L147"><div class="num">147</div><input maxlength="1"></td>
-    <td data-link="L148"><div class="num">148</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L149"><div class="num">149</div><input maxlength="1"></td>
-    <td data-link="L150"><div class="num">150</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L151"><div class="num">151</div><input maxlength="1"></td>
-    <td data-link="L152"><div class="num">152</div><input maxlength="1"></td>
-    <td data-link="L153"><div class="num">153</div><input maxlength="1"></td>
-    <td data-link="L154"><div class="num">154</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td data-link="L155"><div class="num">155</div><input maxlength="1"></td>
-    <td data-link="L156"><div class="num">156</div><input maxlength="1"></td>
-    <td data-link="L157"><div class="num">157</div><input maxlength="1"></td>
-    <td data-link="L158"><div class="num">158</div><input maxlength="1"></td>
-    <td data-link="L159"><div class="num">159</div><input maxlength="1"></td>
-    <td data-link="L160"><div class="num">160</div><input maxlength="1"></td>
-    <td class="black"></td>
-    <td class="black"></td>
-    <td class="black"></td>
-    <td class="black"></td>
-    <td class="black"></td>
-    <td class="black"></td>
-    <td class="black"></td>
-    <td class="black"></td>
-    <td class="black"></td>
-    <td class="black"></td>
-  </tr>
-</table>
-<h2>Answers</h2>
-<div class="answers-grid">
-<div class="clue-text">1. Noted alums: Grammy, Grampy, Roblyn, John T, Jack T.</div><div class="answer-table"><table><tr><td data-link="L28"><div class="smallnum">28</div><input maxlength="1"></td><td data-link="L68"><div class="smallnum">68</div><input maxlength="1"></td><td data-link="L1"><div class="smallnum">1</div><input maxlength="1"></td><td data-link="L6"><div class="smallnum">6</div><input maxlength="1"></td></tr></table></div><div class="clue-text">13. Illegally, or without Xena actress</div><div class="answer-table"><table><tr><td data-link="L95"><div class="smallnum">95</div><input maxlength="1"></td><td data-link="L64"><div class="smallnum">64</div><input maxlength="1"></td><td data-link="L144"><div class="smallnum">144</div><input maxlength="1"></td><td data-link="L101"><div class="smallnum">101</div><input maxlength="1"></td><td data-link="L47"><div class="smallnum">47</div><input maxlength="1"></td><td data-link="L27"><div class="smallnum">27</div><input maxlength="1"></td><td data-link="L30"><div class="smallnum">30</div><input maxlength="1"></td><td data-link="L111"><div class="smallnum">111</div><input maxlength="1"></td><td data-link="L151"><div class="smallnum">151</div><input maxlength="1"></td></tr></table></div><div class="clue-text">2. C.S. Lewis "Chronicles of ___"</div><div class="answer-table"><table><tr><td data-link="L9"><div class="smallnum">9</div><input maxlength="1"></td><td data-link="L14"><div class="smallnum">14</div><input maxlength="1"></td><td data-link="L7"><div class="smallnum">7</div><input maxlength="1"></td><td data-link="L19"><div class="smallnum">19</div><input maxlength="1"></td><td data-link="L33"><div class="smallnum">33</div><input maxlength="1"></td><td data-link="L16"><div class="smallnum">16</div><input maxlength="1"></td></tr></table></div><div class="clue-text">14. We have butter but not a slice (2 words)</div><div class="answer-table"><table><tr><td data-link="L152"><div class="smallnum">152</div><input maxlength="1"></td><td data-link="L83"><div class="smallnum">83</div><input maxlength="1"></td><td data-link="L100"><div class="smallnum">100</div><input maxlength="1"></td><td data-link="L78"><div class="smallnum">78</div><input maxlength="1"></td><td data-link="L70"><div class="smallnum">70</div><input maxlength="1"></td><td data-link="L71"><div class="smallnum">71</div><input maxlength="1"></td><td data-link="L75"><div class="smallnum">75</div><input maxlength="1"></td></tr></table></div><div class="clue-text">3. "____ of a Wimpy Kid"</div><div class="answer-table"><table><tr><td data-link="L5"><div class="smallnum">5</div><input maxlength="1"></td><td data-link="L42"><div class="smallnum">42</div><input maxlength="1"></td><td data-link="L25"><div class="smallnum">25</div><input maxlength="1"></td><td data-link="L22"><div class="smallnum">22</div><input maxlength="1"></td><td data-link="L82"><div class="smallnum">82</div><input maxlength="1"></td></tr></table></div><div class="clue-text">15. Jenny O'Brigham's red headed brother</div><div class="answer-table"><table><tr><td data-link="L48"><div class="smallnum">48</div><input maxlength="1"></td><td data-link="L73"><div class="smallnum">73</div><input maxlength="1"></td><td data-link="L49"><div class="smallnum">49</div><input maxlength="1"></td><td data-link="L52"><div class="smallnum">52</div><input maxlength="1"></td><td data-link="L79"><div class="smallnum">79</div><input maxlength="1"></td><td data-link="L121"><div class="smallnum">121</div><input maxlength="1"></td><td data-link="L86"><div class="smallnum">86</div><input maxlength="1"></td><td data-link="L85"><div class="smallnum">85</div><input maxlength="1"></td><td data-link="L62"><div class="smallnum">62</div><input maxlength="1"></td></tr></table></div><div class="clue-text">4. Who really runs Sunshine (3 words)</div><div class="answer-table"><table><tr><td data-link="L76"><div class="smallnum">76</div><input maxlength="1"></td><td data-link="L40"><div class="smallnum">40</div><input maxlength="1"></td><td data-link="L89"><div class="smallnum">89</div><input maxlength="1"></td><td data-link="L23"><div class="smallnum">23</div><input maxlength="1"></td><td data-link="L13"><div class="smallnum">13</div><input maxlength="1"></td><td data-link="L31"><div class="smallnum">31</div><input maxlength="1"></td><td data-link="L26"><div class="smallnum">26</div><input maxlength="1"></td></tr></table></div><div class="clue-text">16. Light, delicate, other worldly</div><div class="answer-table"><table><tr><td data-link="L84"><div class="smallnum">84</div><input maxlength="1"></td><td data-link="L58"><div class="smallnum">58</div><input maxlength="1"></td><td data-link="L50"><div class="smallnum">50</div><input maxlength="1"></td><td data-link="L94"><div class="smallnum">94</div><input maxlength="1"></td><td data-link="L88"><div class="smallnum">88</div><input maxlength="1"></td><td data-link="L98"><div class="smallnum">98</div><input maxlength="1"></td><td data-link="L87"><div class="smallnum">87</div><input maxlength="1"></td><td data-link="L130"><div class="smallnum">130</div><input maxlength="1"></td></tr></table></div><div class="clue-text">5. A picture that is not sharp is</div><div class="answer-table"><table><tr><td data-link="L20"><div class="smallnum">20</div><input maxlength="1"></td><td data-link="L65"><div class="smallnum">65</div><input maxlength="1"></td><td data-link="L34"><div class="smallnum">34</div><input maxlength="1"></td><td data-link="L96"><div class="smallnum">96</div><input maxlength="1"></td><td data-link="L29"><div class="smallnum">29</div><input maxlength="1"></td><td data-link="L115"><div class="smallnum">115</div><input maxlength="1"></td></tr></table></div><div class="clue-text">17. Football running back or sorority hopeful</div><div class="answer-table"><table><tr><td data-link="L142"><div class="smallnum">142</div><input maxlength="1"></td><td data-link="L153"><div class="smallnum">153</div><input maxlength="1"></td><td data-link="L108"><div class="smallnum">108</div><input maxlength="1"></td><td data-link="L59"><div class="smallnum">59</div><input maxlength="1"></td><td data-link="L105"><div class="smallnum">105</div><input maxlength="1"></td><td data-link="L154"><div class="smallnum">154</div><input maxlength="1"></td></tr></table></div><div class="clue-text">6. Where the wind comes sweepin' down the plain</div><div class="answer-table"><table><tr><td data-link="L120"><div class="smallnum">120</div><input maxlength="1"></td><td data-link="L8"><div class="smallnum">8</div><input maxlength="1"></td><td data-link="L3"><div class="smallnum">3</div><input maxlength="1"></td><td data-link="L38"><div class="smallnum">38</div><input maxlength="1"></td><td data-link="L17"><div class="smallnum">17</div><input maxlength="1"></td><td data-link="L149"><div class="smallnum">149</div><input maxlength="1"></td><td data-link="L81"><div class="smallnum">81</div><input maxlength="1"></td><td data-link="L51"><div class="smallnum">51</div><input maxlength="1"></td></tr></table></div><div class="clue-text">18. Dined at fancy bakery or got ink</div><div class="answer-table"><table><tr><td data-link="L61"><div class="smallnum">61</div><input maxlength="1"></td><td data-link="L99"><div class="smallnum">99</div><input maxlength="1"></td><td data-link="L67"><div class="smallnum">67</div><input maxlength="1"></td><td data-link="L106"><div class="smallnum">106</div><input maxlength="1"></td><td data-link="L112"><div class="smallnum">112</div><input maxlength="1"></td><td data-link="L92"><div class="smallnum">92</div><input maxlength="1"></td></tr></table></div><div class="clue-text">7. Dissertation Chair</div><div class="answer-table"><table><tr><td data-link="L43"><div class="smallnum">43</div><input maxlength="1"></td><td data-link="L107"><div class="smallnum">107</div><input maxlength="1"></td><td data-link="L2"><div class="smallnum">2</div><input maxlength="1"></td><td data-link="L4"><div class="smallnum">4</div><input maxlength="1"></td><td data-link="L10"><div class="smallnum">10</div><input maxlength="1"></td></tr></table></div><div class="clue-text">19. Location of speedometer (3 words)</div><div class="answer-table"><table><tr><td data-link="L157"><div class="smallnum">157</div><input maxlength="1"></td><td data-link="L103"><div class="smallnum">103</div><input maxlength="1"></td><td data-link="L126"><div class="smallnum">126</div><input maxlength="1"></td><td data-link="L63"><div class="smallnum">63</div><input maxlength="1"></td><td data-link="L125"><div class="smallnum">125</div><input maxlength="1"></td><td data-link="L113"><div class="smallnum">113</div><input maxlength="1"></td><td data-link="L102"><div class="smallnum">102</div><input maxlength="1"></td><td data-link="L116"><div class="smallnum">116</div><input maxlength="1"></td><td data-link="L69"><div class="smallnum">69</div><input maxlength="1"></td></tr></table></div><div class="clue-text">8. Bad thing to spill before ball points</div><div class="answer-table"><table><tr><td data-link="L110"><div class="smallnum">110</div><input maxlength="1"></td><td data-link="L39"><div class="smallnum">39</div><input maxlength="1"></td><td data-link="L97"><div class="smallnum">97</div><input maxlength="1"></td><td data-link="L77"><div class="smallnum">77</div><input maxlength="1"></td><td data-link="L21"><div class="smallnum">21</div><input maxlength="1"></td><td data-link="L36"><div class="smallnum">36</div><input maxlength="1"></td><td data-link="L41"><div class="smallnum">41</div><input maxlength="1"></td></tr></table></div><div class="clue-text">20. Related to the ancient Gauls</div><div class="answer-table"><table><tr><td data-link="L124"><div class="smallnum">124</div><input maxlength="1"></td><td data-link="L158"><div class="smallnum">158</div><input maxlength="1"></td><td data-link="L109"><div class="smallnum">109</div><input maxlength="1"></td><td data-link="L135"><div class="smallnum">135</div><input maxlength="1"></td><td data-link="L136"><div class="smallnum">136</div><input maxlength="1"></td><td data-link="L137"><div class="smallnum">137</div><input maxlength="1"></td><td data-link="L122"><div class="smallnum">122</div><input maxlength="1"></td><td data-link="L117"><div class="smallnum">117</div><input maxlength="1"></td></tr></table></div><div class="clue-text">9. Barbuda beverage</div><div class="answer-table"><table><tr><td data-link="L72"><div class="smallnum">72</div><input maxlength="1"></td><td data-link="L18"><div class="smallnum">18</div><input maxlength="1"></td><td data-link="L93"><div class="smallnum">93</div><input maxlength="1"></td><td data-link="L80"><div class="smallnum">80</div><input maxlength="1"></td><td data-link="L90"><div class="smallnum">90</div><input maxlength="1"></td><td data-link="L46"><div class="smallnum">46</div><input maxlength="1"></td><td data-link="L54"><div class="smallnum">54</div><input maxlength="1"></td><td data-link="L24"><div class="smallnum">24</div><input maxlength="1"></td></tr></table></div><div class="clue-text">21. Not accepting refusal</div><div class="answer-table"><table><tr><td data-link="L139"><div class="smallnum">139</div><input maxlength="1"></td><td data-link="L147"><div class="smallnum">147</div><input maxlength="1"></td><td data-link="L133"><div class="smallnum">133</div><input maxlength="1"></td><td data-link="L146"><div class="smallnum">146</div><input maxlength="1"></td><td data-link="L155"><div class="smallnum">155</div><input maxlength="1"></td><td data-link="L128"><div class="smallnum">128</div><input maxlength="1"></td></tr></table></div><div class="clue-text">10. Illuminated by oil, for example</div><div class="answer-table"><table><tr><td data-link="L56"><div class="smallnum">56</div><input maxlength="1"></td><td data-link="L53"><div class="smallnum">53</div><input maxlength="1"></td><td data-link="L114"><div class="smallnum">114</div><input maxlength="1"></td><td data-link="L119"><div class="smallnum">119</div><input maxlength="1"></td><td data-link="L57"><div class="smallnum">57</div><input maxlength="1"></td><td data-link="L118"><div class="smallnum">118</div><input maxlength="1"></td><td data-link="L32"><div class="smallnum">32</div><input maxlength="1"></td></tr></table></div><div class="clue-text">22. Famous cartoon Russian</div><div class="answer-table"><table><tr><td data-link="L150"><div class="smallnum">150</div><input maxlength="1"></td><td data-link="L123"><div class="smallnum">123</div><input maxlength="1"></td><td data-link="L138"><div class="smallnum">138</div><input maxlength="1"></td><td data-link="L134"><div class="smallnum">134</div><input maxlength="1"></td><td data-link="L160"><div class="smallnum">160</div><input maxlength="1"></td><td data-link="L156"><div class="smallnum">156</div><input maxlength="1"></td><td data-link="L143"><div class="smallnum">143</div><input maxlength="1"></td></tr></table></div><div class="clue-text">11. 1986 coming of age movie (3 words)</div><div class="answer-table"><table><tr><td data-link="L11"><div class="smallnum">11</div><input maxlength="1"></td><td data-link="L45"><div class="smallnum">45</div><input maxlength="1"></td><td data-link="L55"><div class="smallnum">55</div><input maxlength="1"></td><td data-link="L74"><div class="smallnum">74</div><input maxlength="1"></td><td data-link="L66"><div class="smallnum">66</div><input maxlength="1"></td><td data-link="L35"><div class="smallnum">35</div><input maxlength="1"></td><td data-link="L127"><div class="smallnum">127</div><input maxlength="1"></td><td data-link="L140"><div class="smallnum">140</div><input maxlength="1"></td><td data-link="L37"><div class="smallnum">37</div><input maxlength="1"></td></tr></table></div><div class="clue-text">23. Building wing or our 12th letter</div><div class="answer-table"><table><tr><td data-link="L159"><div class="smallnum">159</div><input maxlength="1"></td><td data-link="L131"><div class="smallnum">131</div><input maxlength="1"></td><td data-link="L145"><div class="smallnum">145</div><input maxlength="1"></td></tr></table></div><div class="clue-text">12. Grammy financial motto quoted by JR</div><div class="answer-table"><table><tr><td data-link="L141"><div class="smallnum">141</div><input maxlength="1"></td><td data-link="L60"><div class="smallnum">60</div><input maxlength="1"></td><td data-link="L12"><div class="smallnum">12</div><input maxlength="1"></td><td data-link="L44"><div class="smallnum">44</div><input maxlength="1"></td><td data-link="L129"><div class="smallnum">129</div><input maxlength="1"></td><td data-link="L15"><div class="smallnum">15</div><input maxlength="1"></td><td data-link="L104"><div class="smallnum">104</div><input maxlength="1"></td><td data-link="L132"><div class="smallnum">132</div><input maxlength="1"></td><td data-link="L91"><div class="smallnum">91</div><input maxlength="1"></td><td data-link="L148"><div class="smallnum">148</div><input maxlength="1"></td></tr></table></div><div></div><div></div></div>
-
+<div style="overflow-x: auto;">
+  <table id="puzzle"><tr><td data-link="L1"><div class="num">1</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L2"><div class="num">2</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L3"><div class="num">3</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L4"><div class="num">4</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L5"><div class="num">5</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L6"><div class="num">6</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L7"><div class="num">7</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L8"><div class="num">8</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L9"><div class="num">9</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L10"><div class="num">10</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L11"><div class="num">11</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L12"><div class="num">12</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L13"><div class="num">13</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L14"><div class="num">14</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L15"><div class="num">15</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L16"><div class="num">16</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L17"><div class="num">17</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L18"><div class="num">18</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L19"><div class="num">19</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L20"><div class="num">20</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L21"><div class="num">21</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L22"><div class="num">22</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L23"><div class="num">23</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L24"><div class="num">24</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L25"><div class="num">25</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L26"><div class="num">26</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L27"><div class="num">27</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L28"><div class="num">28</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L29"><div class="num">29</div><input maxlength="1" inputmode="text" autocomplete="off"></td></tr><tr><td data-link="L30"><div class="num">30</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L31"><div class="num">31</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L32"><div class="num">32</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L33"><div class="num">33</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L34"><div class="num">34</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L35"><div class="num">35</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L36"><div class="num">36</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L37"><div class="num">37</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L38"><div class="num">38</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L39"><div class="num">39</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L40"><div class="num">40</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L41"><div class="num">41</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L42"><div class="num">42</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L43"><div class="num">43</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L44"><div class="num">44</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L45"><div class="num">45</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L46"><div class="num">46</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L47"><div class="num">47</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L48"><div class="num">48</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L49"><div class="num">49</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L50"><div class="num">50</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L51"><div class="num">51</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L52"><div class="num">52</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L53"><div class="num">53</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L54"><div class="num">54</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L55"><div class="num">55</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L56"><div class="num">56</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L57"><div class="num">57</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L58"><div class="num">58</div><input maxlength="1" inputmode="text" autocomplete="off"></td></tr><tr><td data-link="L59"><div class="num">59</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L60"><div class="num">60</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L61"><div class="num">61</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L62"><div class="num">62</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L63"><div class="num">63</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L64"><div class="num">64</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L65"><div class="num">65</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L66"><div class="num">66</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L67"><div class="num">67</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L68"><div class="num">68</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L69"><div class="num">69</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L70"><div class="num">70</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L71"><div class="num">71</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L72"><div class="num">72</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L73"><div class="num">73</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L74"><div class="num">74</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L75"><div class="num">75</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L76"><div class="num">76</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L77"><div class="num">77</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L78"><div class="num">78</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L79"><div class="num">79</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L80"><div class="num">80</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L81"><div class="num">81</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L82"><div class="num">82</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L83"><div class="num">83</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L84"><div class="num">84</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L85"><div class="num">85</div><input maxlength="1" inputmode="text" autocomplete="off"></td></tr><tr><td data-link="L86"><div class="num">86</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L87"><div class="num">87</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L88"><div class="num">88</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L89"><div class="num">89</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L90"><div class="num">90</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L91"><div class="num">91</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L92"><div class="num">92</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L93"><div class="num">93</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L94"><div class="num">94</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L95"><div class="num">95</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L96"><div class="num">96</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L97"><div class="num">97</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L98"><div class="num">98</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L99"><div class="num">99</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L100"><div class="num">100</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L101"><div class="num">101</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L102"><div class="num">102</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L103"><div class="num">103</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L104"><div class="num">104</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L105"><div class="num">105</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L106"><div class="num">106</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L107"><div class="num">107</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L108"><div class="num">108</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L109"><div class="num">109</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L110"><div class="num">110</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L111"><div class="num">111</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L112"><div class="num">112</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L113"><div class="num">113</div><input maxlength="1" inputmode="text" autocomplete="off"></td></tr><tr><td class="black"></td><td data-link="L114"><div class="num">114</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L115"><div class="num">115</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L116"><div class="num">116</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L117"><div class="num">117</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L118"><div class="num">118</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L119"><div class="num">119</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L120"><div class="num">120</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L121"><div class="num">121</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L122"><div class="num">122</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L123"><div class="num">123</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L124"><div class="num">124</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L125"><div class="num">125</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L126"><div class="num">126</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L127"><div class="num">127</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L128"><div class="num">128</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L129"><div class="num">129</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L130"><div class="num">130</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L131"><div class="num">131</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L132"><div class="num">132</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L133"><div class="num">133</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L134"><div class="num">134</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L135"><div class="num">135</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L136"><div class="num">136</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L137"><div class="num">137</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L138"><div class="num">138</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L139"><div class="num">139</div><input maxlength="1" inputmode="text" autocomplete="off"></td></tr><tr><td data-link="L140"><div class="num">140</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L141"><div class="num">141</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L142"><div class="num">142</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L143"><div class="num">143</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L144"><div class="num">144</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L145"><div class="num">145</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L146"><div class="num">146</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L147"><div class="num">147</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L148"><div class="num">148</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L149"><div class="num">149</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L150"><div class="num">150</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L151"><div class="num">151</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L152"><div class="num">152</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L153"><div class="num">153</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L154"><div class="num">154</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td data-link="L155"><div class="num">155</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L156"><div class="num">156</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L157"><div class="num">157</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L158"><div class="num">158</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L159"><div class="num">159</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td data-link="L160"><div class="num">160</div><input maxlength="1" inputmode="text" autocomplete="off"></td><td class="black"></td><td class="black"></td><td class="black"></td><td class="black"></td><td class="black"></td><td class="black"></td><td class="black"></td><td class="black"></td><td class="black"></td><td class="black"></td></tr></table></div><div class="answers-grid">
+</div>
+<div id="answer-viewer">
+  <div id="single-answer-container"></div>
+  <div class="nav-buttons">
+    <button id="prev-btn">◀ Previous</button>
+    <button id="next-btn">Next ▶</button>
+  </div>
+</div>
 <script>
-// Hover + Bidirectional Sync + Smart Navigation (with Up/Down linkage)
-document.querySelectorAll('[data-link]').forEach(cell => {
-  const input = cell.querySelector('input');
-  const link = cell.getAttribute('data-link');
-
-  // --- Hover highlight ---
-  cell.addEventListener('mouseenter', () => {
-    document.querySelectorAll('[data-link="' + link + '"]').forEach(el => el.classList.add('link-highlight'));
-  });
-  cell.addEventListener('mouseleave', () => {
-    document.querySelectorAll('[data-link="' + link + '"]').forEach(el => el.classList.remove('link-highlight'));
-  });
-
-  // --- Input synchronization ---
-  if (input) {
-    input.addEventListener('input', () => {
-      const val = input.value.toUpperCase();
-      document.querySelectorAll('[data-link="' + link + '"]').forEach(el => {
-        const otherInput = el.querySelector('input');
-        if (otherInput && otherInput !== input) {
-          otherInput.value = val;
-        }
-      });
+document.addEventListener('DOMContentLoaded', () => {
+    const inputs = document.querySelectorAll('input');
+    
+    inputs.forEach(input => {
+        input.addEventListener('input', (e) => {
+            const val = e.target.value.toUpperCase();
+            const td = e.target.closest('td');
+            if (!td) return;
+            const link = td.dataset.link;
+            document.querySelectorAll(`[data-link="${link}"] input`).forEach(i => i.value = val);
+            if (val !== "") focusNext(e.target);
+        });
     });
 
-    // --- Navigation handling ---
-    input.addEventListener('keydown', e => {
-      const allInputs = Array.from(document.querySelectorAll('input'));
-      const current = e.target;
+    function focusNext(current) {
+        const all = Array.from(inputs);
+        const idx = all.indexOf(current);
+        if (idx < all.length - 1) all[idx + 1].focus();
+    }
 
-      // Identify whether we're in the puzzle or answer grid
-      const inPuzzle = current.closest('#puzzle') !== null;
-      const rowParent = current.closest('.answer-table tr');
-      const rowInputs = rowParent ? Array.from(rowParent.querySelectorAll('input')) : [];
+    // Mobile Navigation Logic
+    const clues = Array.from(document.querySelectorAll('.clue-row'));
+    let currentIdx = 0;
+    const container = document.getElementById('single-answer-container');
 
-      const idxInRow = rowInputs.indexOf(current);
-      const idxGlobal = allInputs.indexOf(current);
+    function updateMobile(idx) {
+        container.innerHTML = clues[idx].innerHTML;
+        container.querySelectorAll('input').forEach(mi => {
+            const link = mi.closest('td').dataset.link;
+            const master = document.querySelector(`table#puzzle [data-link="${link}"] input`);
+            mi.value = master.value;
+            mi.oninput = (e) => {
+                master.value = e.target.value;
+                master.dispatchEvent(new Event('input'));
+            };
+        });
+    }
 
-      // Helper: focus safely
-      function focusInput(inp) { if (inp) inp.focus(); }
+    document.getElementById('next-btn').onclick = () => { if(currentIdx < clues.length-1) updateMobile(++currentIdx); };
+    document.getElementById('prev-btn').onclick = () => { if(currentIdx > 0) updateMobile(--currentIdx); };
+    if (window.innerWidth <= 768) updateMobile(0);
 
-      // --- LEFT arrow ---
-      if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        if (rowInputs.length > 0 && idxInRow > 0) {
-          focusInput(rowInputs[idxInRow - 1]);
-        } else if (rowInputs.length > 0 && idxInRow === 0) {
-          // Go to previous answer row (last cell)
-          const prevRow = rowParent?.closest('.answer-table')?.previousElementSibling;
-          if (prevRow && prevRow.classList.contains('clue-text')) {
-            const prevTable = prevRow.nextElementSibling;
-            const prevInputs = prevTable?.querySelectorAll('input');
-            if (prevInputs && prevInputs.length) {
-              focusInput(prevInputs[prevInputs.length - 1]);
-              return;
-            }
-          }
-        } else {
-          // fallback global left
-          if (idxGlobal > 0) focusInput(allInputs[idxGlobal - 1]);
-        }
-      }
-
-      // --- RIGHT arrow ---
-      else if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        if (rowInputs.length > 0 && idxInRow < rowInputs.length - 1) {
-          focusInput(rowInputs[idxInRow + 1]);
-        } else if (rowInputs.length > 0 && idxInRow === rowInputs.length - 1) {
-          // Jump to next answer row (first cell)
-          const nextTable = rowParent?.closest('.answer-table')?.nextElementSibling;
-          const nextIsClue = nextTable && nextTable.classList.contains('clue-text');
-          let nextInputs = null;
-          if (nextIsClue) {
-            const afterClue = nextTable.nextElementSibling;
-            nextInputs = afterClue?.querySelectorAll('input');
-          } else {
-            nextInputs = nextTable?.querySelectorAll('input');
-          }
-          if (nextInputs && nextInputs.length) {
-            focusInput(nextInputs[0]);
-            return;
-          }
-        } else {
-          // fallback global right
-          if (idxGlobal < allInputs.length - 1) focusInput(allInputs[idxGlobal + 1]);
-        }
-      }
-
-      // --- UP arrow (jump to linked puzzle/answer cell above) ---
-      else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        const link = current.closest('[data-link]')?.getAttribute('data-link');
-        if (link) {
-          const linkedCells = Array.from(document.querySelectorAll('[data-link="' + link + '"]'));
-          // Try to find a linked cell in the *other* grid
-          const target = linkedCells.find(el =>
-            inPuzzle ? el.closest('.answer-table') : el.closest('#puzzle')
-          );
-          if (target) {
-            const targetInput = target.querySelector('input');
-            if (targetInput) focusInput(targetInput);
-          }
-        }
-      }
-
-      // --- DOWN arrow (jump to linked puzzle/answer cell below) ---
-      else if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        const link = current.closest('[data-link]')?.getAttribute('data-link');
-        if (link) {
-          const linkedCells = Array.from(document.querySelectorAll('[data-link="' + link + '"]'));
-          const target = linkedCells.find(el =>
-            inPuzzle ? el.closest('.answer-table') : el.closest('#puzzle')
-          );
-          if (target) {
-            const targetInput = target.querySelector('input');
-            if (targetInput) focusInput(targetInput);
-          }
-        }
-      }
-
-      // --- Auto-advance after typing or Enter ---
-      else if (e.key === 'Enter' || /^[a-zA-Z]$/.test(e.key)) {
-        setTimeout(() => {
-          if (rowInputs.length > 0 && idxInRow < rowInputs.length - 1) {
-            focusInput(rowInputs[idxInRow + 1]);
-          } else if (rowInputs.length > 0 && idxInRow === rowInputs.length - 1) {
-            // Jump to next answer row
-            const nextTable = rowParent?.closest('.answer-table')?.nextElementSibling;
-            const nextIsClue = nextTable && nextTable.classList.contains('clue-text');
-            let nextInputs = null;
-            if (nextIsClue) {
-              const afterClue = nextTable.nextElementSibling;
-              nextInputs = afterClue?.querySelectorAll('input');
-            } else {
-              nextInputs = nextTable?.querySelectorAll('input');
-            }
-            if (nextInputs && nextInputs.length) {
-              focusInput(nextInputs[0]);
-            }
-          } else {
-            // fallback to next global input
-            if (idxGlobal < allInputs.length - 1) focusInput(allInputs[idxGlobal + 1]);
-          }
-        }, 0);
-      }
-    });
-  }
+    document.getElementById('clearBtn').onclick = () => { if(confirm("Clear?")) { localStorage.clear(); location.reload(); }};
 });
 </script>
-
-
-</body>
-</html>
+</body></html>
