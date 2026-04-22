@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <!-- meta -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta name="description" content="A memory game, built for fun with HTML, CSS, and JavaScript.">
+  <meta name="author" content="Nick Salloum">
+
+  <!-- title -->
+  <title>Xmas Memory Game!</title>
+
+  <!-- css -->
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto+Slab">
+  <link rel="stylesheet" href="../m2/css/memory.css">
+
+  <!-- og -->
+  <meta property="og:title" content="Memory Game!">
+  <meta property="og:url" content="http://callmenick.com/memory/">
+  <meta property="og:image" content="http://callmenick.com/memory/img/og-image.png">
+
+</head>
+<body>
+  
+  <div class="wrapper">
+    
+    <div class="header clearfix" style="background-color:maroon;">
+      <div class="header__logo">
+        <a href="http://callmenick.com">
+          <img src="../m2/img/logo.png" alt="Call Me Nick - Tutorials, Snippets, Resources, and Articles for Web Design and Web Development">
+        </a>
+      </div>
+      <h1 style="color:#32cd32;text-align: center;">Merry Christmas, Family! Memory Game</h1>
+    </div><!-- /.header -->
+    
+    <div class="content" >
+      <div class="container">
+        
+        <div id="my-memory-game"></div>
+
+      </div>
+    </div><!-- /.content -->
+
+
+  </div><!-- /.wrapper -->
+  
+  <!-- js -->
+  <script src="../m2/js/classList.min.js"></script>
+  <script src="../m2/js/memory.js"></script>
+
+  <!-- start memory! -->
+  <script>
+    (function(){
+	<!--var cmdStr = "alert(\"here\");"-->
+	<!--eval(cmdStr);-->
+	var myMem = new Memory({
+        wrapperID : "my-memory-game",
+		cards : [
+			{id:1,img:"2013-10-12_15-47-53_HDR.jpg"},
+			{id:2,img:"20140810_125334.jpg"},
+			{id:3,img:"20141011_141706-EFFECTS.jpg"},
+			{id:4,img:"20141012_162624.jpg"},
+			{id:5,img:"20141013_071558.jpg"},
+			{id:6,img:"20150808_100917-EFFECTS.jpg"},
+			{id:7,img:"20150808_133744.jpg"},
+			{id:8,img:"20150808_143653.jpg"},
+			{id:9,img:"20150828_145308.jpg"},
+			{id:10,img:"20150828_160943.jpg"},
+			{id:11,img:"20150829_111822.jpg"},
+			{id:12,img:"20151011_073802-EFFECTS.jpg"},
+			{id:13,img:"20151011_175641~2.jpg"},
+			{id:14,img:"20151012_111924.jpg"},
+			{id:15,img:"20151012_111929.jpg"},
+			{id:16,img:"20151012_112009.jpg"},
+			{id:17,img:"20151012_112311.jpg"},
+			{id:18,img:"20160813_145310.jpg"},
+			{id:19,img:"20160904_071647.jpg"},
+			{id:20,img:"20160904_071656.jpg"},
+			{id:21,img:"20160905_094653.jpg"},
+			{id:22,img:"CAM00115.jpg"},
+			{id:23,img:"CAM00121.jpg"},
+			{id:24,img:"IMG00317.jpg"},
+			{id:25,img:"IMG_2573.jpg"},
+			{id:26,img:"IMG_2575.jpg"},
+			{id:27,img:"IMG_2597.jpg"},
+			{id:28,img:"IMG_2618.jpg"},
+			{id:29,img:"IMG_2622.jpg"},
+			{id:30,img:"IMG_2629.jpg"},
+			{id:31,img:"IMG_2633.jpg"},
+			{id:32,img:"IMG_2691.jpg"},
+			{id:33,img:"IMG_2721.jpg"},
+			{id:34,img:"IMG_2742.jpg"},
+			{id:35,img:"IMG_5129.jpg"},
+			{id:35,img:"IMG_5129.jpg"}],
+        onGameStart : function() { return false; },
+        onGameEnd : function() { return false; }
+      });
+	  <!-- alert(myMem.cards[1].img);myMem.cards.push({id :19,img: \"../memory/img/Rosie2.png\"} );-->
+		<!--myMem.cards.push(id:19, img:\"../memory/img/Rosie2.png\");-->
+		<!--alert(myMem.cards[1].id);-->
+    })();
+  </script>
+  
+
+
+</body>
+</html>

@@ -1,0 +1,33 @@
+<html>
+<head>
+  <script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+</head>
+<body>
+<h1>Memory Game</h1>
+<div id = "container">
+	<img id="img1" src="img/Emme.png">
+	
+</div>
+<div id="container2">
+<input type="image" id="myimage" style="height:200px;width:200px;" src="img/jenny.png" />
+</div>
+<button id="button1" onclick="changeImg()">Click me</button>
+	<script>
+function changeImg() {
+	var images = ['img/Ben.png','img/Coby.png','img/Emme.png','img/Googie.png','img/Grammy.png','img/Gramps.png','img/Grampy.png','img/jenny.png','img/Katie.png','img/Lily.png','img/Peter.png']
+
+	i = Math.floor((Math.random() * 10000000) % images.length);
+	//alert(i);
+	return images[i];
+}
+
+</script>
+<script>
+	$('#button1').on({
+		'click': function(){
+			$('#img1').attr('src',changeImg());
+		}
+	});
+	</script>
+</body>
+</html>
