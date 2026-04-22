@@ -1,0 +1,25 @@
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+        <title>test</title>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+        <script>
+           $(function() {
+			//$('#output').load("textdata/blankdata.txt");
+			// we need to load list of jpgs with given prefix
+			$.getJSON(("../cgi-bin/json2.py"), function(data) {
+					$('#div1').html(data.cards)
+				});	
+	});
+        </script>
+		<script>
+		var theCards = ($.getJSON(("../cgi-bin/json2.py"), function(data) {jQuery.makeArray(data)})})
+		alert("what?;");
+		</script>
+    </head>
+    <body>
+		<div id="div1">Default Stuff</div>
+	</body>
+
+</html>

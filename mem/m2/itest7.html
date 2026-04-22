@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <!-- meta -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta name="description" content="A memory game, built for fun with HTML, CSS, and JavaScript.">
+  <meta name="author" content="Nick Salloum">
+
+  <!-- title -->
+  <title>Xmas Memory Game!</title>
+
+  <!-- css -->
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto+Slab">
+  <link rel="stylesheet" href="css/memory.min.css">
+
+  <!-- og -->
+  <meta property="og:title" content="Memory Game!">
+  <meta property="og:url" content="http://callmenick.com/memory/">
+  <meta property="og:image" content="http://callmenick.com/memory/img/og-image.png">
+
+</head>
+<body>
+  
+  <div class="wrapper">
+    
+    <div class="header clearfix">
+      <div class="header__logo">
+        <a href="http://callmenick.com">
+          <img src="img/logo.png" alt="Call Me Nick - Tutorials, Snippets, Resources, and Articles for Web Design and Web Development">
+        </a>
+      </div>
+      <h1 class="header__title">Memory Game!</h1>
+    </div><!-- /.header -->
+    
+    <div class="content">
+      <div class="container">
+        
+        <div id="my-memory-game"></div>
+
+      </div>
+    </div><!-- /.content -->
+
+
+  </div><!-- /.wrapper -->
+  
+  <!-- js -->
+  <script src="js/classList.min.js"></script>
+  <script src="js/memory.js"></script>
+
+  <!-- start memory! -->
+  <script>
+    (function(){
+	var cmdStr = "alert(\"here\");"
+	eval(cmdStr);
+		var imgs = ["Ben.png","Coby.png","Emme.png","Googie.png","Grammy.png","Grampy.png","Hannah.jpg","jenny.png","John.jpg","Katie.png","Lily.png","Lily_Jenny.jpg","Peter.png","roblyn.png","Roblyn_and_Hannah.jpg","Ron_Alison_Ben.jpg","Rosie.png"];
+
+	var myMem = new Memory({
+        wrapperID : "my-memory-game",
+        cards : [
+          {
+            id : 1,
+            img: ""
+          },
+          {
+            id : 2,
+            img: "../memory/img/Coby.png"
+          },
+          {
+            id : 3,
+            img: "../memory/img/Emme.png"
+          },
+          {
+            id : 4,
+            img: "../memory/img/Googie.png"
+          },
+          {
+            id : 5,
+            img: "../memory/img/Grammy.png"
+          },
+          {
+            id : 6,
+            img: "../memory/img/Grampy.png"
+          },
+          {
+            id : 7,
+            img: "../memory/img/jenny.png"
+          },
+          {
+            id : 8,
+            img: "../memory/img/Katie.png"
+          },
+          {
+            id : 9,
+            img: "../memory/img/Lily.png"
+          },
+          {
+            id : 10,
+            img: "../memory/img/Peter.png"
+          },
+          {
+            id : 11,
+            img: "../memory/img/Alison.jpg"
+          },
+          {
+            id : 12,
+            img: "../memory/img/Hannah.jpg"
+          },
+          {
+            id : 13,
+            img: "../memory/img/John.jpg"
+          },
+          {
+            id : 14,
+            img: "../memory/img/Roblyn_and_Hannah.jpg"
+          },
+          {
+            id : 15,
+            img: "../memory/img/Lily_Jenny.jpg"
+          },
+          {
+            id : 16,
+            img: "../memory/img/Ron_Alison_Ben.jpg"
+          },
+		  {
+            id : 17,
+			<!--img: "https://c2.staticflickr.com/6/5719/30067270801_1aea2984f2_n.jpg"-->
+            img: "../memory/img/Gramps.png"
+          },
+		  {
+            id : 18,
+            img: "../memory/img/Gramps.png"
+          }
+        ],
+        onGameStart : function() { return false; },
+        onGameEnd : function() { return false; }
+      });
+	  <!-- alert(myMem.cards[1].img);myMem.cards.push({id :19,img: \"../memory/img/Rosie2.png\"} );-->
+		<!--myMem.cards.push([{id:19,img:"../memory/img/Gramps.png"}]);-->
+		<!--alert(myMem.cards[1]["img"]);-->
+		<!--myMem.cards[2]["img"] = "WTF"-->;
+		alert(myMem.cards.length);
+		<!-- TRY CALLING PYTHON HERE, RETURNING LIST OF IMAGES. MAKE ARRAY OUT OF LIST, LOOP OVER CARDS TO CHANGE IMG -->
+		<!-- THE PROBLEM IS IF THE PYTHON LIST IS LONGER THAN THE CARDS ARRAY.  HOW DO WE PUSH!!????????-->
+		for (j=0; j<imgs.length; j++) {
+			<!--alert(myMem.cards[j]["img"]);-->
+			myMem.cards[j]["img"] = ("../PATHNAME/".concat(imgs[j]));
+		}
+		myMem.cards.push({id:20,img:"WTF"});
+		for (j=0; j<myMem.cards.length; j++) {
+			alert(myMem.cards[j]["img"]);
+		}
+    })();
+  </script>
+  
+
+
+</body>
+</html>

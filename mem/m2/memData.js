@@ -1,0 +1,86 @@
+    (function(){
+      var myMem = new Memory({
+        wrapperID : "my-memory-game",
+        cards : [
+          {
+            id : 1,
+            img: "../memory/img/Ben.png"
+          },
+          {
+            id : 2,
+            img: "../memory/img/Coby.png"
+          },
+          {
+            id : 3,
+            img: "../memory/img/Emme.png"
+          },
+          {
+            id : 4,
+            img: "../memory/img/Googie.png"
+          },
+          {
+            id : 5,
+            img: "../memory/img/Grammy.png"
+          },
+          {
+            id : 6,
+            img: "../memory/img/Grampy.png"
+          },
+          {
+            id : 7,
+            img: "../memory/img/jenny.png"
+          },
+          {
+            id : 8,
+            img: "../memory/img/Katie.png"
+          },
+          {
+            id : 9,
+            img: "../memory/img/Lily.png"
+          },
+          {
+            id : 10,
+            img: "../memory/img/Peter.png"
+          },
+          {
+            id : 11,
+            img: "../memory/img/Alison.jpg"
+          },
+          {
+            id : 12,
+            img: "../memory/img/Hannah.jpg"
+          },
+          {
+            id : 13,
+            img: "../memory/img/John.jpg"
+          },
+          {
+            id : 14,
+            img: "../memory/img/Roblyn_and_Hannah.jpg"
+          },
+          {
+            id : 15,
+            img: "../memory/img/Lily_Jenny.jpg"
+          },
+          {
+            id : 16,
+            img: "../memory/img/Ron_Alison_Ben.jpg"
+          },
+		  {
+            id : 17,
+			<!--img: "https://c2.staticflickr.com/6/5719/30067270801_1aea2984f2_n.jpg"-->
+            img: "../memory/img/Gramps.png"
+          },
+		  {
+            id : 18,
+            img: "../memory/img/Gramps.png"
+          },
+		  {
+            id : 19,
+            img: "../memory/img/Rosie2.png"
+          }
+        ],
+        onGameStart : function() { return false; },
+        onGameEnd : function() { return false; }
+      });
+    })();
