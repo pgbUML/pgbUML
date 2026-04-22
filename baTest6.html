@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+<title>b4nAftR</title>
+<style>
+#output {
+	font-family: Arial, sans-serif;
+	font-size: 1.0vw;
+}
+data1 {
+	font-family: Arial, sans-serif;
+	font-size: x-small;
+
+}
+data2 {
+	font-family: Arial, sans-serif;
+	font-size: medium;
+
+}
+
+</style>
+	<link href="../UML_before_and_after/css/foundation.css" rel="stylesheet" type="text/css" />
+	<link href="../UML_before_and_after/css/twentytwenty.css" rel="stylesheet" type="text/css" />
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+<script>
+	$( document ).ready(function() {			
+		$.getJSON("ba1.json", function(data) {
+			var vals = [];
+			vals = data.menuItems.split(",");
+			//vals = ['Please choose from above'];
+			var $jsontwo = $("#text-one");
+			$jsontwo.empty();
+			$.each(vals, function(index, value) {
+				$jsontwo.append("<option>" + value + "</option>");
+			});
+		});
+	});
+</script>
+</head>
+<div id="menu" style="background-color:#FFFFFF;width:20%; height:auto; float:left;">
+		<select name="menu1" id="text-one">
+			<option selected value="base">Please Select</option>
+			</select>
+		<p></p>
+		<p></p>
+		<p></p>
+		<div id="output"></div>
+		<p>....</p>
+		</div>
+<div id = "ba" class="twentytwenty-container">
+  <img id="before" src="ESPN__0000_exg.jpg" />
+  <img id="after" src="ESPN__0001_longTerm.jpg" />
+</div>
+	<script src="../UML_before_and_after/js/jquery.event.move.js"></script>
+    <script src="../UML_before_and_after/js/jquery.twentytwenty.js"></script><script>
+    $(window).load(function(){
+      $(".twentytwenty-container").twentytwenty({default_offset_pct: 0.5});  
+    });
+</script>
+<script>
+		$(function() {
+			$("#text-one").change(function() {
+				$.getJSON("ba1.json", function(data) {
+					i = $(("select[name='menu1'] option:selected")).index();
+					var befores = [];
+					var afters = [];
+					befores = data.before.split(",");
+					afters = data.after.split(",");
+					//alert(vals[i]);
+					$("#before").attr("src", befores[i]);
+					$("#after").attr("src", afters[i]);
+			});	
+		});
+	});
+</script>
+</body>
+</html>

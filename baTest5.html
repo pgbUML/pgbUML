@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+<title>b4nAftR</title>
+<style>
+#output {
+	font-family: Arial, sans-serif;
+	font-size: 1.0vw;
+}
+data1 {
+	font-family: Arial, sans-serif;
+	font-size: x-small;
+
+}
+data2 {
+	font-family: Arial, sans-serif;
+	font-size: medium;
+
+}
+
+</style>
+  <link href="css/foundation.css" rel="stylesheet" type="text/css" />
+  <link href="css/twentytwenty.css" rel="stylesheet" type="text/css" />
+</head>
+<div id="menu" style="background-color:#FFFFFF;width:20%; height:auto; float:left;">
+		<select id="text-one">
+			<option selected value="base">Please Select</option>
+			<option value="ESPN_BA">ESPN_BA</option>
+			<option value="SouthQuad">SouthQuad</option>
+			<option value="katie_then_and_now">Katie</option>
+			<option value="jenny_then_and_now">Jenny</option>
+			</select>
+		<p></p>
+		<p></p>
+		<p></p>
+		<div id="output"></div>
+		<p>....</p>
+		</div>
+<div id = "ba" class="twentytwenty-container">
+  <img id="before" src="ESPN__0000_exg.jpg" />
+  <img id="after" src="ESPN__0001_longTerm.jpg" />
+</div>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+<script src="js/jquery.event.move.js"></script>
+<script src="js/jquery.twentytwenty.js"></script>
+<script>
+    $(window).load(function(){
+      $(".twentytwenty-container").twentytwenty({default_offset_pct: 0.5});  
+    });
+</script>
+<script>
+		$(function() {
+			$("#text-one").change(function() {
+				n = $(this).val();
+				$("#before").attr("src", "SouthQuad_BA__0000_before.jpg");
+				$("#after").attr("src", "SouthQuad_BA__0002_After.jpg");
+			});	
+		});
+</script>
+</body>
+</html>

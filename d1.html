@@ -1,0 +1,42 @@
+<HTML>
+<HEAD>
+</HEAD>
+<BODY>
+<select id="destinations">
+    <option value="">Select</option>
+</select>
+<a href="#" id="fetch">Fetch JSON</a>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<script>
+var json = {
+    "Destinations": [
+    {
+        "destinationName": "London",
+        "destinationID": "lon"
+    },
+    {
+        "destinationName": "New York",
+        "destinationID": "nyc"
+    },
+    {
+        "destinationName": "Paris",
+        "destinationID": "par"
+    },
+    {
+        "destinationName": "Rome",
+        "destinationID": "rom"
+    }
+    ]
+};
+
+$('#fetch').click(function() {
+	alert("What?");
+    $.post('d1.json', {json: JSON.stringify(json)}, function(data) {
+        $.each(data.Destinations, function(i, v) {
+            $('#destinations').append('<option value="' + v.destinationID + '">' + v.destinationName + '</option>');
+        });
+    });
+});
+</script>
+</BODY>
+</HTML>

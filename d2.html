@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<!-- saved from url=(0054)http://fiddle.jshell.net/pbrigham/avym66dx/show/light/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+
+<script type="text/javascript">//<![CDATA[
+$(window).load(function(){
+var json = {
+    "Destinations": [
+    {
+        "destinationName": "London",
+        "destinationID": "lon"
+    },
+    {
+        "destinationName": "New York",
+        "destinationID": "nyc"
+    },
+    {
+        "destinationName": "Paris",
+        "destinationID": "par"
+    },
+    {
+        "destinationName": "Rome",
+        "destinationID": "rom"
+    }
+    ]
+};
+
+$('#fetch').click(function() {
+    $.post('/echo/json/', {json: JSON.stringify(json)}, function(data) {
+        $.each(data.Destinations, function(i, v) {
+            $('#destinations').append('<option value="' + v.destinationID + '">' + v.destinationName + '</option>');
+        });
+    });
+});
+});//]]> 
+
+</script>
+</head>
+<body>
+  <select id="destinations">
+    <option value="">Select</option>
+</select>
+<a href="http://fiddle.jshell.net/pbrigham/avym66dx/show/light/#" id="fetch">Fetch JSON</a>
+</body></html>

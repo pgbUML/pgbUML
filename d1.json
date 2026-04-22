@@ -1,0 +1,19 @@
+{  "Destinations": [
+    {
+        "destinationName": "London",
+        "destinationID": "lon"
+    },
+    {
+        "destinationName": "New York",
+        "destinationID": "nyc"
+    },
+    {
+        "destinationName": "Paris",
+        "destinationID": "par"
+    },
+    {
+        "destinationName": "Rome",
+        "destinationID": "rom"
+    }
+    ]
+};

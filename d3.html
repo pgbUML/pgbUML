@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/JavaScript" src="http://ajax.googleapis.com/ajax/libs/
+jquery/1.3.0/jquery.min.js"></script>
+
+<script type="text/javascript">//<![CDATA[
+$(window).load(function(){
+var json = {
+    "Destinations": [
+    {
+        "destinationName": "London",
+        "destinationID": "lon"
+    },
+    {
+        "destinationName": "New York",
+        "destinationID": "nyc"
+    },
+    {
+        "destinationName": "Paris",
+        "destinationID": "par"
+    },
+    {
+        "destinationName": "Rome",
+        "destinationID": "rom"
+    }
+    ]
+};
+
+$('#fetch').click(function() {
+    $.post('d1.json', {json: JSON.stringify(json)}, function(data) {
+        $.each(data.Destinations, function(i, v) {
+            $('#destinations').append('<option value="' + v.destinationID + '">' + v.destinationName + '</option>');
+        });
+    });
+});
+});//]]> 
+
+</script>
+</head>
+<body>
+  <select id="destinations">
+    <option value="">Select</option>
+</select>
+<a href="#" id="fetch">Fetch JSON</a>
+</body></html>
