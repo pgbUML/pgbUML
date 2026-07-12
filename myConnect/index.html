@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS Connections Clone</title>
+    <style>
+        :root {
+            --yellow: #f9df6d;
+            --green: #a0c35a;
+            --blue: #b0c4ef;
+            --purple: #ba81c5;
+            --border: #efefe6;
+            --text: #000000;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #fff;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 { text-transform: uppercase; letter-spacing: 2px; }
+
+        #game-container {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        #message {
+            height: 30px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tile {
+            aspect-ratio: 1 / 1;
+            background-color: var(--border);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            padding: 5px;
+            user-select: none;
+            transition: background-color 0.2s;
+        }
+
+        .tile.selected {
+            background-color: #5a594e;
+            color: white;
+        }
+
+        .solved-row {
+            grid-column: span 4;
+            height: 80px;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            animation: pop 0.4s ease-out;
+        }
+
+        .solved-row h3 { margin: 0; text-transform: uppercase; font-size: 1rem; }
+        .solved-row p { margin: 5px 0 0 0; font-size: 0.9rem; }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border-radius: 25px;
+            border: 1px solid #333;
+            background: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        #history {
+            width: 100%;
+            border-top: 1px solid #ccc;
+            padding-top: 20px;
+        }
+
+        .history-item {
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+
+        .color-dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            margin-right: 4px;
+            border-radius: 2px;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Connections</h1>
+    <div id="message">Create groups of four!</div>
+
+    <div id="game-container">
+        <div id="solved-section"></div>
+        <div id="grid" class="grid"></div>
+
+        <div class="controls">
+            <button id="submit-btn" disabled>Submit</button>
+            <button id="deselect-btn">Deselect All</button>
+        </div>
+
+        <div id="history">
+            <h3>Guess History</h3>
+            <div id="history-log"></div>
+        </div>
+    </div>
+
+<script>
+    /** * DATA STRUCTURE
+     * Edit these entries to change the game. 
+     * Difficulty: 0=Yellow, 1=Green, 2=Blue, 3=Purple
+     */
+    const categories = [
+        { difficulty: 0, desc: "DISTILLED SPIRITS", items: ["RYE", "TEQUILA", "RUM", "WHISKEY"] },
+        { difficulty: 1, desc: "TRANSPORTATION MODES", items: ["TRAMS", "WAYMOS", "SUBWAYS", "BUSES"] },
+        { difficulty: 2, desc: "ASSOCIATED WITH GRAMPS", items: ["KENTUCKY", "MAINE", "PLANNING", "ZINZINDORFF"] },
+        { difficulty: 3, desc: "RED SOX AD PARTS", items: ["BOURBON", "PAMILY", "KARS", "DIAPERS"] }
+    ];
+
+    const COLORS = ['var(--yellow)', 'var(--green)', 'var(--blue)', 'var(--purple)'];
+    const EMOJIS = ['🟨', '🟩', '🟦', '🟪'];
+
+    let words = [];
+    let selectedIndices = [];
+    let solvedCategories = [];
+    let guessHistory = [];
+    let mistakesRemaining = 4;
+    let isGameOver = false;
+
+    const gridEl = document.getElementById('grid');
+    const solvedEl = document.getElementById('solved-section');
+    const messageEl = document.getElementById('message');
+    const submitBtn = document.getElementById('submit-btn');
+    const deselectBtn = document.getElementById('deselect-btn');
+    const historyLogEl = document.getElementById('history-log');
+
+    function initGame() {
+        // Flatten words and shuffle
+        categories.forEach((cat, index) => {
+            cat.items.forEach(item => {
+                words.push({ text: item, categoryId: index });
+            });
+        });
+        words.sort(() => Math.random() - 0.5);
+        render();
+    }
+
+    function render() {
+        gridEl.innerHTML = '';
+        words.forEach((word, index) => {
+            const tile = document.createElement('div');
+            tile.classList.add('tile');
+            if (selectedIndices.includes(index)) tile.classList.add('selected');
+            tile.textContent = word.text;
+            tile.onclick = () => toggleSelect(index);
+            gridEl.appendChild(tile);
+        });
+
+        submitBtn.disabled = selectedIndices.length !== 4 || isGameOver;
+    }
+
+    function toggleSelect(index) {
+        if (isGameOver) return;
+        const pos = selectedIndices.indexOf(index);
+        if (pos > -1) {
+            selectedIndices.splice(pos, 1);
+        } else if (selectedIndices.length < 4) {
+            selectedIndices.push(index);
+        }
+        render();
+    }
+
+    deselectBtn.onclick = () => {
+        selectedIndices = [];
+        render();
+    };
+
+    submitBtn.onclick = () => {
+        if (selectedIndices.length !== 4) return;
+
+        const currentGuessIndices = [...selectedIndices];
+        const currentGuessWords = currentGuessIndices.map(i => words[i].text).sort();
+        const guessString = currentGuessWords.join(',');
+
+        // Check if already guessed
+        if (guessHistory.some(g => g.words.join(',') === guessString)) {
+            showMessage("Already guessed!");
+            return;
+        }
+
+        // Identify categories in guess
+        const categoryCounts = {};
+        currentGuessIndices.forEach(i => {
+            const catId = words[i].categoryId;
+            categoryCounts[catId] = (categoryCounts[catId] || 0) + 1;
+        });
+
+        const counts = Object.values(categoryCounts);
+        const maxMatch = Math.max(...counts);
+        const matchedCatId = Object.keys(categoryCounts).find(key => categoryCounts[key] === 4);
+
+        if (matchedCatId !== undefined) {
+            handleCorrect(parseInt(matchedCatId), currentGuessIndices);
+        } else {
+            handleIncorrect(maxMatch, currentGuessWords, currentGuessIndices);
+        }
+    };
+
+    function handleCorrect(catId, indices) {
+        solvedCategories.push(catId);
+        
+        // Remove from active words
+        const wordsToRemove = indices.map(i => words[i].text);
+        words = words.filter(w => !wordsToRemove.includes(w.text));
+        
+        // Add to solved display
+        const cat = categories[catId];
+        const row = document.createElement('div');
+        row.className = 'solved-row';
+        row.style.backgroundColor = COLORS[cat.difficulty];
+        row.innerHTML = `<h3>${cat.desc}</h3><p>${cat.items.join(', ')}</p>`;
+        solvedEl.appendChild(row);
+
+        selectedIndices = [];
+        addToHistory(indices, "Correct!");
+        
+        if (solvedCategories.length === 4) {
+            isGameOver = true;
+            showMessage("CONGRATS!");
+            showNYTSummary();
+        } else {
+            showMessage("Nice!");
+        }
+        render();
+    }
+
+    function handleIncorrect(maxMatch, wordList, indices) {
+        mistakesRemaining--;
+        let feedback = "Nope";
+        
+        if (maxMatch === 3) feedback = "One away!";
+        showMessage(feedback);
+        
+        addToHistory(indices, feedback);
+
+        if (mistakesRemaining === 0) {
+            isGameOver = true;
+            showMessage("Next time!");
+            revealAll();
+        }
+        render();
+    }
+
+    function addToHistory(indices, feedback) {
+        const guessObj = {
+            words: indices.map(i => words[i].text),
+            colors: indices.map(i => EMOJIS[words[i].categoryId])
+        };
+        guessHistory.push(guessObj);
+
+        const logEntry = document.createElement('div');
+        logEntry.className = 'history-item';
+        logEntry.innerHTML = `${guessObj.colors.join('')} ${guessObj.words.join(', ')} — <em>${feedback}</em>`;
+        historyLogEl.prepend(logEntry);
+    }
+
+    function showMessage(txt) {
+        messageEl.textContent = txt;
+        if (txt !== "Create groups of four!") {
+            setTimeout(() => { if(!isGameOver) messageEl.textContent = "Create groups of four!"; }, 2000);
+        }
+    }
+
+    function revealAll() {
+        gridEl.style.display = 'none';
+        categories.forEach((cat, index) => {
+            if (!solvedCategories.includes(index)) {
+                const row = document.createElement('div');
+                row.className = 'solved-row';
+                row.style.backgroundColor = COLORS[cat.difficulty];
+                row.innerHTML = `<h3>${cat.desc}</h3><p>${cat.items.join(', ')}</p>`;
+                solvedEl.appendChild(row);
+            }
+        });
+        showNYTSummary();
+    }
+
+    function showNYTSummary() {
+        const summary = document.createElement('div');
+        summary.style.marginTop = "20px";
+        summary.style.textAlign = "center";
+        let emojiGrid = "";
+        guessHistory.forEach(g => {
+            emojiGrid += g.colors.join('') + "<br>";
+        });
+        summary.innerHTML = `<h4>Final Results</h4>${emojiGrid}`;
+        historyLogEl.prepend(summary);
+    }
+
+    initGame();
+</script>
+</body>
+</html>
