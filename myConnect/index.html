@@ -3,190 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NYT Connections Game</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+    <title>Phil</title>
     <style>
         :root {
             --yellow: #f9df6d;
             --green: #a0c35a;
             --blue: #b0c4ef;
             --purple: #ba81c5;
-            --tile-bg: #efefe6;
-            --tile-selected: #5a594e;
-            --tile-text-selected: #ffffff;
-            --text-primary: #111827;
+            --border: #efefe6;
+            --text: #000000;
         }
 
         body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background-color: #faf9f6;
-            color: var(--text-primary);
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #fff;
+            color: #333;
             margin: 0;
-            padding: 0;
-            min-height: 100vh;
+            padding: 20px;
         }
 
-        .title-font {
-            font-family: 'Frank Ruhl Libre', Georgia, serif;
-        }
+        h1 { text-transform: uppercase; letter-spacing: 2px; }
 
-        /* Responsive Safe Grid & Tile Styling */
-        .game-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0.5rem;
+        #game-container {
             width: 100%;
             max-width: 600px;
-            box-sizing: border-box;
         }
 
-        .tile-btn {
-            background-color: var(--tile-bg);
-            color: var(--text-primary);
-            min-height: 60px;
-            height: auto;
+        #message {
+            height: 30px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tile {
+            aspect-ratio: 1 / 1;
+            background-color: var(--border);
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 0.5rem 0.25rem;
-            border-radius: 0.6rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            line-height: 1.15;
-            font-size: clamp(0.72rem, 2.5vw, 0.95rem);
-            word-break: break-word;
-            hyphens: auto;
-            user-select: none;
-            touch-action: manipulation;
-            border: none;
-            outline: none;
+            font-weight: bold;
+            font-size: 0.9rem;
             cursor: pointer;
-            transition: background-color 0.15s ease, transform 0.1s ease, color 0.15s ease;
+            padding: 5px;
+            user-select: none;
+            transition: background-color 0.2s;
         }
 
-        .tile-btn.selected {
-            background-color: var(--tile-selected);
-            color: var(--tile-text-selected);
-        }
-
-        .tile-btn:active {
-            transform: scale(0.96);
-        }
-
-        /* Category Color Classes */
-        .cat-yellow { background-color: var(--yellow); color: #2d2800; }
-        .cat-green { background-color: var(--green); color: #162900; }
-        .cat-blue { background-color: var(--blue); color: #081d42; }
-        .cat-purple { background-color: var(--purple); color: #2c0038; }
-
-        /* Animations */
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-6px); }
-            40%, 80% { transform: translateX(6px); }
-        }
-
-        .shake-grid {
-            animation: shake 0.35s ease-in-out;
-        }
-
-        @keyframes popIn {
-            0% { transform: scale(0.92); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
+        .tile.selected {
+            background-color: #5a594e;
+            color: white;
         }
 
         .solved-row {
-            animation: popIn 0.3s ease-out forwards;
+            grid-column: span 4;
+            height: 80px;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            animation: pop 0.4s ease-out;
+        }
+
+        .solved-row h3 { margin: 0; text-transform: uppercase; font-size: 1rem; }
+        .solved-row p { margin: 5px 0 0 0; font-size: 0.9rem; }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border-radius: 25px;
+            border: 1px solid #333;
+            background: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        #history {
+            width: 100%;
+            border-top: 1px solid #ccc;
+            padding-top: 20px;
+        }
+
+        .history-item {
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+
+        .color-dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            margin-right: 4px;
+            border-radius: 2px;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
         }
     </style>
 </head>
-<body class="flex flex-col items-center justify-between p-3 sm:p-6 min-h-screen">
+<body>
 
-    <div class="w-full max-w-xl mx-auto flex flex-col items-center">
-        
-        <!-- Header -->
-        <header class="text-center my-3 sm:my-4">
-            <h1 class="title-font text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-900 mb-1">Connections</h1>
-            <p id="sub-title" class="text-xs sm:text-sm font-medium text-gray-600">Create four groups of four!</p>
-        </header>
+    <h1>Connections</h1>
+    <div id="message">Create groups of four!</div>
 
-        <!-- Toast Feedback Notification -->
-        <div class="h-10 mb-2 flex items-center justify-center">
-            <div id="toast" class="opacity-0 transition-opacity duration-200 px-4 py-1.5 bg-gray-900 text-white text-xs sm:text-sm font-semibold rounded-full shadow-md pointer-events-none">
-                Feedback
-            </div>
+    <div id="game-container">
+        <div id="solved-section"></div>
+        <div id="grid" class="grid"></div>
+
+        <div class="controls">
+            <button id="submit-btn" disabled>Submit</button>
+            <button id="deselect-btn">Deselect All</button>
         </div>
 
-        <!-- Solved Category Rows -->
-        <div id="solved-container" class="w-full space-y-2 mb-2"></div>
-
-        <!-- 4x4 Tiles Grid -->
-        <div id="grid-container" class="game-grid mb-5">
-            <!-- Tiles rendered dynamically via JavaScript -->
+        <div id="history">
+            <h3>Guess History</h3>
+            <div id="history-log"></div>
         </div>
-
-        <!-- Remaining Mistakes Counter -->
-        <div id="mistakes-container" class="flex items-center justify-center space-x-2 mb-5">
-            <span class="text-xs sm:text-sm font-medium text-gray-600">Mistakes remaining:</span>
-            <div id="mistakes-dots" class="flex space-x-2">
-                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-gray-800"></div>
-                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-gray-800"></div>
-                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-gray-800"></div>
-                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-gray-800"></div>
-            </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div id="controls" class="flex flex-wrap items-center justify-center gap-2.5 mb-6 w-full">
-            <button id="btn-shuffle" type="button" class="px-4 py-2.5 rounded-full border border-gray-900 text-gray-900 font-semibold text-xs sm:text-sm hover:bg-gray-100 active:scale-95 transition-all">
-                Shuffle!!
-            </button>
-            <button id="btn-deselect" type="button" class="px-4 py-2.5 rounded-full border border-gray-900 text-gray-900 font-semibold text-xs sm:text-sm hover:bg-gray-100 active:scale-95 transition-all">
-                Deselect All
-            </button>
-            <button id="btn-submit" type="button" disabled class="px-6 py-2.5 rounded-full border border-gray-900 bg-gray-900 text-white font-semibold text-xs sm:text-sm disabled:opacity-30 disabled:cursor-not-allowed hover:bg-black active:scale-95 transition-all">
-                Submit
-            </button>
-            <button id="btn-restart" type="button" class="hidden px-6 py-2.5 rounded-full bg-black text-white font-semibold text-xs sm:text-sm hover:bg-gray-800 active:scale-95 transition-all">
-                Play Again
-            </button>
-        </div>
-
-        <!-- Collapsible Dropdown Guess History -->
-        <div id="history-wrapper" class="w-full border border-gray-200 rounded-2xl bg-white shadow-sm overflow-hidden transition-all duration-200">
-            <button id="history-toggle" type="button" class="w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-gray-50 font-semibold text-xs sm:text-sm text-gray-700 outline-none">
-                <span class="flex items-center gap-2">
-                    <span id="history-arrow" class="text-xs">▼</span>
-                    <span>Guess History</span>
-                    <span id="history-badge" class="bg-gray-200 text-gray-700 text-xs px-2 py-0.5 rounded-full">0</span>
-                </span>
-                <span class="text-xs text-gray-400 font-normal">Click to toggle</span>
-            </button>
-            
-            <div id="history-content" class="hidden px-3 pb-3 pt-1 sm:px-4 sm:pb-4 border-t border-gray-100 space-y-2 max-h-60 overflow-y-auto">
-                <p id="history-empty" class="text-xs text-gray-400 italic text-center py-2">No guesses submitted yet.</p>
-                <div id="history-log" class="space-y-2"></div>
-            </div>
-        </div>
-
     </div>
 
-    <!-- Footer -->
-    <footer class="mt-8 text-center text-xs text-gray-400">
-        NYT Connections Clone • Single Page App
-    </footer>
-
-    <script>
-        /**
-         * GAME DATA STRUCTURE
-         * Edit this array to customize categories and words.
-         * Difficulty: 0 = Yellow, 1 = Green, 2 = Blue, 3 = Purple
-         */
+<script>
+    /** * DATA STRUCTURE
+     * Edit these entries to change the game. 
+     * Difficulty: 0=Yellow, 1=Green, 2=Blue, 3=Purple
+     */
 const categories = [
         { difficulty: 0, desc: "UNIT OF TIME", items: ["WEEK", "MONTH", "YEAR", "DECADE"] },
         { difficulty: 1, desc: "ORIGINAL STAR TREK CHARACTERS", items: ["SPOCK", "SCOTTY", "UHURA", "SULU"] },
@@ -194,332 +157,187 @@ const categories = [
         { difficulty: 3, desc: "STARTS WITH CRAZY", items: ["LADY", "HAPPY", "DAY", "BONES"] }
     ];
 
-        const COLOR_CLASSES = ['cat-yellow', 'cat-green', 'cat-blue', 'cat-purple'];
-        const EMOJI_MAP = ['🟨', '🟩', '🟦', '🟪'];
+    const COLORS = ['var(--yellow)', 'var(--green)', 'var(--blue)', 'var(--purple)'];
+    const EMOJIS = ['🟨', '🟩', '🟦', '🟪'];
 
-        // Core State
-        let activeWords = [];       // { text: string, categoryId: number }
-        let selectedIndices = [];   // indexes in activeWords
-        let solvedCategoryIds = [];
-        let guessHistory = [];      // { words: string[], emojis: string[], feedback: string }
-        let mistakesRemaining = 4;
-        let isGameOver = false;
-        let toastTimer = null;
-        let historyOpen = false;
+    let words = [];
+    let selectedIndices = [];
+    let solvedCategories = [];
+    let guessHistory = [];
+    let mistakesRemaining = 4;
+    let isGameOver = false;
 
-        // DOM Elements
-        const gridContainer = document.getElementById('grid-container');
-        const solvedContainer = document.getElementById('solved-container');
-        const toastEl = document.getElementById('toast');
-        const btnSubmit = document.getElementById('btn-submit');
-        const btnDeselect = document.getElementById('btn-deselect');
-        const btnShuffle = document.getElementById('btn-shuffle');
-        const btnRestart = document.getElementById('btn-restart');
-        const mistakesDots = document.getElementById('mistakes-dots');
-        const historyToggle = document.getElementById('history-toggle');
-        const historyContent = document.getElementById('history-content');
-        const historyArrow = document.getElementById('history-arrow');
-        const historyBadge = document.getElementById('history-badge');
-        const historyEmpty = document.getElementById('history-empty');
-        const historyLog = document.getElementById('history-log');
+    const gridEl = document.getElementById('grid');
+    const solvedEl = document.getElementById('solved-section');
+    const messageEl = document.getElementById('message');
+    const submitBtn = document.getElementById('submit-btn');
+    const deselectBtn = document.getElementById('deselect-btn');
+    const historyLogEl = document.getElementById('history-log');
 
-        /**
-         * STREAMING_CHUNK:Defining game initialization and grid rendering functions...
-         */
-        function initGame() {
-            activeWords = [];
-            selectedIndices = [];
-            solvedCategoryIds = [];
-            guessHistory = [];
-            mistakesRemaining = 4;
-            isGameOver = false;
-
-            // Unpack categories into grid items
-            CATEGORIES.forEach((cat, index) => {
-                cat.items.forEach(item => {
-                    activeWords.push({
-                        text: item.trim().toUpperCase(),
-                        categoryId: index
-                    });
-                });
+    function initGame() {
+        // Flatten words and shuffle
+        categories.forEach((cat, index) => {
+            cat.items.forEach(item => {
+                words.push({ text: item, categoryId: index });
             });
+        });
+        words.sort(() => Math.random() - 0.5);
+        render();
+    }
 
-            // Randomize words
-            shuffleArray(activeWords);
+    function render() {
+        gridEl.innerHTML = '';
+        words.forEach((word, index) => {
+            const tile = document.createElement('div');
+            tile.classList.add('tile');
+            if (selectedIndices.includes(index)) tile.classList.add('selected');
+            tile.textContent = word.text;
+            tile.onclick = () => toggleSelect(index);
+            gridEl.appendChild(tile);
+        });
 
-            // Reset UI
-            solvedContainer.innerHTML = '';
-            historyLog.innerHTML = '';
-            historyEmpty.classList.remove('hidden');
-            historyBadge.textContent = '0';
-            
-            historyOpen = false;
-            historyContent.classList.add('hidden');
-            historyArrow.textContent = '▼';
+        submitBtn.disabled = selectedIndices.length !== 4 || isGameOver;
+    }
 
-            btnSubmit.classList.remove('hidden');
-            btnDeselect.classList.remove('hidden');
-            btnShuffle.classList.remove('hidden');
-            btnRestart.classList.add('hidden');
-            btnSubmit.disabled = true;
+    function toggleSelect(index) {
+        if (isGameOver) return;
+        const pos = selectedIndices.indexOf(index);
+        if (pos > -1) {
+            selectedIndices.splice(pos, 1);
+        } else if (selectedIndices.length < 4) {
+            selectedIndices.push(index);
+        }
+        render();
+    }
 
-            updateMistakesUI();
-            renderGrid();
+    deselectBtn.onclick = () => {
+        selectedIndices = [];
+        render();
+    };
+
+    submitBtn.onclick = () => {
+        if (selectedIndices.length !== 4) return;
+
+        const currentGuessIndices = [...selectedIndices];
+        const currentGuessWords = currentGuessIndices.map(i => words[i].text).sort();
+        const guessString = currentGuessWords.join(',');
+
+        // Check if already guessed
+        if (guessHistory.some(g => g.words.join(',') === guessString)) {
+            showMessage("Already guessed!");
+            return;
         }
 
-        function shuffleArray(arr) {
-            for (let i = arr.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [arr[i], arr[j]] = [arr[j], arr[i]];
-            }
+        // Identify categories in guess
+        const categoryCounts = {};
+        currentGuessIndices.forEach(i => {
+            const catId = words[i].categoryId;
+            categoryCounts[catId] = (categoryCounts[catId] || 0) + 1;
+        });
+
+        const counts = Object.values(categoryCounts);
+        const maxMatch = Math.max(...counts);
+        const matchedCatId = Object.keys(categoryCounts).find(key => categoryCounts[key] === 4);
+
+        if (matchedCatId !== undefined) {
+            handleCorrect(parseInt(matchedCatId), currentGuessIndices);
+        } else {
+            handleIncorrect(maxMatch, currentGuessWords, currentGuessIndices);
         }
+    };
 
-        function renderGrid() {
-            gridContainer.innerHTML = '';
+    function handleCorrect(catId, indices) {
+        solvedCategories.push(catId);
+        
+        // Remove from active words
+        const wordsToRemove = indices.map(i => words[i].text);
+        words = words.filter(w => !wordsToRemove.includes(w.text));
+        
+        // Add to solved display
+        const cat = categories[catId];
+        const row = document.createElement('div');
+        row.className = 'solved-row';
+        row.style.backgroundColor = COLORS[cat.difficulty];
+        row.innerHTML = `<h3>${cat.desc}</h3><p>${cat.items.join(', ')}</p>`;
+        solvedEl.appendChild(row);
 
-            activeWords.forEach((wordObj, idx) => {
-                const button = document.createElement('button');
-                button.type = 'button';
-                button.className = 'tile-btn' + (selectedIndices.includes(idx) ? ' selected' : '');
-                button.textContent = wordObj.text;
-                button.onclick = () => handleTileClick(idx);
-                gridContainer.appendChild(button);
-            });
-
-            btnSubmit.disabled = selectedIndices.length !== 4 || isGameOver;
+        selectedIndices = [];
+        addToHistory(indices, "Correct!");
+        
+        if (solvedCategories.length === 4) {
+            isGameOver = true;
+            showMessage("CONGRATS!");
+            showNYTSummary();
+        } else {
+            showMessage("Nice!");
         }
+        render();
+    }
 
-        function handleTileClick(index) {
-            if (isGameOver) return;
+    function handleIncorrect(maxMatch, wordList, indices) {
+        mistakesRemaining--;
+        let feedback = "Nope";
+        
+        if (maxMatch === 3) feedback = "One away!";
+        showMessage(feedback);
+        
+        addToHistory(indices, feedback);
 
-            const pos = selectedIndices.indexOf(index);
-            if (pos > -1) {
-                selectedIndices.splice(pos, 1);
-            } else if (selectedIndices.length < 4) {
-                selectedIndices.push(index);
-            }
-
-            renderGrid();
+        if (mistakesRemaining === 0) {
+            isGameOver = true;
+            showMessage("Next time!");
+            revealAll();
         }
+        render();
+    }
 
-        /**
-         * STREAMING_CHUNK:Implementing submission handler, answer validation, and feedback logic...
-         */
-        function handleSubmitGuess() {
-            if (selectedIndices.length !== 4 || isGameOver) return;
-
-            const currentGuessWords = selectedIndices.map(i => activeWords[i].text).sort();
-            const guessKey = currentGuessWords.join('|');
-
-            // Check duplicate guess
-            const isDuplicate = guessHistory.some(g => [...g.words].sort().join('|') === guessKey);
-            if (isDuplicate) {
-                showToast("Already guessed!");
-                triggerShake();
-                return;
-            }
-
-            // Count category occurrences
-            const catCounts = {};
-            selectedIndices.forEach(i => {
-                const catId = activeWords[i].categoryId;
-                catCounts[catId] = (catCounts[catId] || 0) + 1;
-            });
-
-            const counts = Object.values(catCounts);
-            const maxMatch = Math.max(...counts);
-            const matchCatId = Object.keys(catCounts).find(k => catCounts[k] === 4);
-
-            const emojis = selectedIndices.map(i => EMOJI_MAP[activeWords[i].categoryId]);
-
-            if (matchCatId !== undefined) {
-                handleCorrect(parseInt(matchCatId), currentGuessWords, emojis);
-            } else {
-                handleIncorrect(maxMatch, currentGuessWords, emojis);
-            }
-        }
-
-        function handleCorrect(catId, words, emojis) {
-            solvedCategoryIds.push(catId);
-            addHistoryEntry(words, emojis, "Correct!");
-
-            const categoryItems = CATEGORIES[catId].items.map(i => i.toUpperCase());
-            activeWords = activeWords.filter(w => !categoryItems.includes(w.text));
-            selectedIndices = [];
-
-            renderSolvedRow(catId);
-
-            if (solvedCategoryIds.length === 4) {
-                isGameOver = true;
-                showToast("CONGRATS!");
-                setTimeout(endGameVictory, 400);
-            } else {
-                showToast("Nice!");
-            }
-
-            renderGrid();
-        }
-
-        function renderSolvedRow(catId) {
-            const cat = CATEGORIES[catId];
-            const row = document.createElement('div');
-            row.className = `w-full rounded-xl p-3.5 text-center ${COLOR_CLASSES[cat.difficulty]} solved-row shadow-sm flex flex-col justify-center items-center`;
-            row.innerHTML = `
-                <h2 class="font-extrabold text-xs sm:text-sm tracking-wider uppercase mb-0.5">${cat.desc}</h2>
-                <p class="text-xs sm:text-sm font-medium opacity-90">${cat.items.join(', ')}</p>
-            `;
-            solvedContainer.appendChild(row);
-        }
-
-        function handleIncorrect(maxMatch, words, emojis) {
-            mistakesRemaining--;
-            updateMistakesUI();
-
-            const feedback = maxMatch === 3 ? "One away!" : "Nope";
-            showToast(feedback);
-            triggerShake();
-            addHistoryEntry(words, emojis, feedback);
-
-            if (mistakesRemaining === 0) {
-                isGameOver = true;
-                setTimeout(endGameDefeat, 600);
-            }
-        }
-
-        /**
-         * STREAMING_CHUNK:Implementing history logging, dropdown interactions, and end-game states...
-         */
-        function addHistoryEntry(words, emojis, feedback) {
-            guessHistory.push({ words, emojis, feedback });
-
-            historyEmpty.classList.add('hidden');
-            historyBadge.textContent = guessHistory.length;
-
-            const entry = document.createElement('div');
-            entry.className = "flex items-center justify-between text-xs sm:text-sm bg-stone-50 p-2.5 rounded-lg border border-stone-200";
-
-            let resultColor = "text-gray-500";
-            if (feedback === "Correct!") resultColor = "text-green-600";
-            else if (feedback === "One away!") resultColor = "text-amber-600";
-
-            entry.innerHTML = `
-                <div class="flex items-center space-x-2 overflow-hidden">
-                    <span class="text-sm sm:text-base leading-none tracking-wider">${emojis.join('')}</span>
-                    <span class="font-medium text-gray-800 truncate">${words.join(', ')}</span>
-                </div>
-                <span class="font-bold text-xs ${resultColor} shrink-0 ml-2">${feedback}</span>
-            `;
-
-            historyLog.prepend(entry);
-        }
-
-        function endGameVictory() {
-            showSummaryMatrix();
-            enableRestartBtn();
-        }
-
-        function endGameDefeat() {
-            showToast("Next time!");
-            
-            CATEGORIES.forEach((cat, index) => {
-                if (!solvedCategoryIds.includes(index)) {
-                    renderSolvedRow(index);
-                }
-            });
-
-            activeWords = [];
-            gridContainer.innerHTML = '';
-            
-            showSummaryMatrix();
-            enableRestartBtn();
-        }
-
-        function showSummaryMatrix() {
-            const box = document.createElement('div');
-            box.className = "my-2 p-3 bg-stone-100 rounded-xl text-center border border-stone-200";
-            
-            const matrixHTML = guessHistory.map(g => g.emojis.join('')).join('<br>');
-            
-            box.innerHTML = `
-                <div class="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Final Result</div>
-                <div class="text-base sm:text-lg tracking-widest leading-snug">${matrixHTML}</div>
-            `;
-
-            historyLog.prepend(box);
-            
-            // Auto open history on completion
-            historyOpen = true;
-            historyContent.classList.remove('hidden');
-            historyArrow.textContent = '▲';
-        }
-
-        function enableRestartBtn() {
-            btnSubmit.classList.add('hidden');
-            btnDeselect.classList.add('hidden');
-            btnShuffle.classList.add('hidden');
-            btnRestart.classList.remove('hidden');
-        }
-
-        function updateMistakesUI() {
-            mistakesDots.innerHTML = '';
-            for (let i = 0; i < 4; i++) {
-                const dot = document.createElement('div');
-                dot.className = `w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
-                    i < mistakesRemaining ? 'bg-gray-800' : 'bg-gray-300 scale-75'
-                }`;
-                mistakesDots.appendChild(dot);
-            }
-        }
-
-        function showToast(msg) {
-            if (toastTimer) clearTimeout(toastTimer);
-            toastEl.textContent = msg;
-            toastEl.style.opacity = '1';
-            toastTimer = setTimeout(() => {
-                toastEl.style.opacity = '0';
-            }, 2000);
-        }
-
-        function triggerShake() {
-            gridContainer.classList.add('shake-grid');
-            setTimeout(() => {
-                gridContainer.classList.remove('shake-grid');
-            }, 360);
-        }
-
-        // Toggle History Accordion
-        historyToggle.onclick = () => {
-            historyOpen = !historyOpen;
-            if (historyOpen) {
-                historyContent.classList.remove('hidden');
-                historyArrow.textContent = '▲';
-            } else {
-                historyContent.classList.add('hidden');
-                historyArrow.textContent = '▼';
-            }
+    function addToHistory(indices, feedback) {
+        const guessObj = {
+            words: indices.map(i => words[i].text),
+            colors: indices.map(i => EMOJIS[words[i].categoryId])
         };
+        guessHistory.push(guessObj);
 
-        // Button Listeners
-        btnDeselect.onclick = () => {
-            selectedIndices = [];
-            renderGrid();
-        };
+        const logEntry = document.createElement('div');
+        logEntry.className = 'history-item';
+        logEntry.innerHTML = `${guessObj.colors.join('')} ${guessObj.words.join(', ')} — <em>${feedback}</em>`;
+        historyLogEl.prepend(logEntry);
+    }
 
-        btnShuffle.onclick = () => {
-            if (isGameOver) return;
-            shuffleArray(activeWords);
-            selectedIndices = [];
-            renderGrid();
-        };
-
-        btnSubmit.onclick = handleSubmitGuess;
-        btnRestart.onclick = initGame;
-
-        // Guaranteed double-hook initialization
-        document.addEventListener('DOMContentLoaded', initGame);
-        if (document.readyState === 'interactive' || document.readyState === 'complete') {
-            initGame();
+    function showMessage(txt) {
+        messageEl.textContent = txt;
+        if (txt !== "Create groups of four!") {
+            setTimeout(() => { if(!isGameOver) messageEl.textContent = "Create groups of four!"; }, 2000);
         }
-    </script>
+    }
+
+    function revealAll() {
+        gridEl.style.display = 'none';
+        categories.forEach((cat, index) => {
+            if (!solvedCategories.includes(index)) {
+                const row = document.createElement('div');
+                row.className = 'solved-row';
+                row.style.backgroundColor = COLORS[cat.difficulty];
+                row.innerHTML = `<h3>${cat.desc}</h3><p>${cat.items.join(', ')}</p>`;
+                solvedEl.appendChild(row);
+            }
+        });
+        showNYTSummary();
+    }
+
+    function showNYTSummary() {
+        const summary = document.createElement('div');
+        summary.style.marginTop = "20px";
+        summary.style.textAlign = "center";
+        let emojiGrid = "";
+        guessHistory.forEach(g => {
+            emojiGrid += g.colors.join('') + "<br>";
+        });
+        summary.innerHTML = `<h4>Final Results</h4>${emojiGrid}`;
+        historyLogEl.prepend(summary);
+    }
+
+    initGame();
+</script>
 </body>
 </html>
