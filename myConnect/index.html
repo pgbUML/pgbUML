@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connections Clone</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Connections Mobile Game</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
         :root {
             --yellow: #f9df6d;
@@ -24,118 +25,145 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: #faf9f6;
             color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            height: -webkit-fill-available;
         }
 
         .title-font {
             font-family: 'Frank Ruhl Libre', serif;
         }
 
-        /* Tile pop and shift animations */
+        /* Animations */
         @keyframes tilePop {
             0% { transform: scale(0.95); opacity: 0.8; }
-            50% { transform: scale(1.05); }
+            50% { transform: scale(1.03); }
             100% { transform: scale(1); opacity: 1; }
         }
 
         @keyframes rowReveal {
-            0% { transform: translateY(-10px) scale(0.98); opacity: 0; }
-            100% { transform: translateY(0) scale(1); opacity: 1; }
+            0% { transform: translateY(-8px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
         }
 
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-6px); }
-            40%, 80% { transform: translateX(6px); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
         }
 
         .tile-animate {
-            animation: tilePop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: tilePop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .row-reveal {
-            animation: rowReveal 0.4s ease-out forwards;
+            animation: rowReveal 0.35s ease-out forwards;
         }
 
         .shake-animation {
-            animation: shake 0.4s ease-in-out;
+            animation: shake 0.35s ease-in-out;
         }
 
-        /* Category banner themes */
+        /* Category Color Themes */
         .bg-cat-yellow { background-color: var(--yellow); color: #2d2800; }
         .bg-cat-green { background-color: var(--green); color: #162900; }
         .bg-cat-blue { background-color: var(--blue); color: #081d42; }
         .bg-cat-purple { background-color: var(--purple); color: #2c0038; }
 
-        /* Custom details arrow animation */
-        details summary::-webkit-details-marker {
-            display: none;
-        }
-        
-        details summary svg.chevron {
-            transition: transform 0.25s ease;
+        /* Responsive Grid & Tile Mobile Safeguards */
+        #grid-container {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.5rem;
+            width: 100%;
+            max-width: 600px;
+            box-sizing: border-box;
         }
 
-        details[open] summary svg.chevron {
-            transform: rotate(180deg);
+        .tile-button {
+            min-width: 0; /* Prevents overflow/disappearing grid items on Android Chrome */
+            width: 100%;
+            aspect-ratio: 1 / 0.85; /* Ensures healthy aspect ratio on mobile portrait */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0.25rem;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: -0.01em;
+            line-height: 1.1;
+            /* Fluid fluid typography scaling */
+            font-size: clamp(0.7rem, 2.8vw, 1rem);
+            user-select: none;
+            touch-action: manipulation;
         }
+
+        /* Accordion Chevron Rotation */
+        details summary::-webkit-details-marker { display: none; }
+        details summary svg.chevron { transition: transform 0.2s ease; }
+        details[open] summary svg.chevron { transform: rotate(180deg); }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-between p-4 sm:p-6 select-none">
+<body class="flex flex-col items-center justify-between p-3 sm:p-6">
 
-    <div class="w-full max-w-lg flex flex-col items-center my-auto">
-        <!-- Header Section -->
-        <header class="text-center mb-6">
+    <div class="w-full max-w-lg mx-auto flex flex-col items-center my-auto">
+        
+        <!-- Header -->
+        <header class="text-center my-3 sm:my-5">
             <h1 class="title-font text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-900 mb-1">Connections</h1>
-            <p id="sub-title" class="text-sm font-medium text-gray-600">Create four groups of four!</p>
+            <p id="sub-title" class="text-xs sm:text-sm font-medium text-gray-600">Create four groups of four!</p>
         </header>
 
-        <!-- Dynamic Feedback Message Toast -->
-        <div id="toast-container" class="h-10 mb-4 flex items-center justify-center">
-            <div id="toast" class="hidden px-4 py-2 bg-gray-900 text-white text-xs sm:text-sm font-semibold rounded-full shadow-lg transition-all duration-300 transform scale-95">
-                Feedback text
+        <!-- Feedback Toast Notification -->
+        <div id="toast-container" class="h-8 sm:h-10 mb-3 flex items-center justify-center">
+            <div id="toast" class="hidden px-4 py-1.5 sm:py-2 bg-gray-900 text-white text-xs sm:text-sm font-semibold rounded-full shadow-md transition-all duration-300">
+                Feedback
             </div>
         </div>
 
-        <!-- Solved Categories Container -->
+        <!-- Solved Category Rows -->
         <div id="solved-container" class="w-full space-y-2 mb-2"></div>
 
-        <!-- Interactive 4x4 Grid -->
-        <div id="grid-container" class="w-full grid grid-cols-4 gap-2 sm:gap-2.5 mb-6">
-            <!-- Tiles dynamically injected here -->
+        <!-- Interactive Grid (Safeguarded for Mobile Chrome) -->
+        <div id="grid-container" class="mb-5">
+            <!-- Tiles rendered dynamically -->
         </div>
 
-        <!-- Mistakes Indicator -->
-        <div id="mistakes-container" class="flex items-center justify-center space-x-2 mb-6">
+        <!-- Remaining Mistakes Counter -->
+        <div id="mistakes-container" class="flex items-center justify-center space-x-2 mb-5">
             <span class="text-xs sm:text-sm font-medium text-gray-500">Mistakes remaining:</span>
-            <div id="mistakes-dots" class="flex space-x-1.5">
-                <div class="w-3 h-3 bg-gray-700 rounded-full transition-all duration-300"></div>
-                <div class="w-3 h-3 bg-gray-700 rounded-full transition-all duration-300"></div>
-                <div class="w-3 h-3 bg-gray-700 rounded-full transition-all duration-300"></div>
-                <div class="w-3 h-3 bg-gray-700 rounded-full transition-all duration-300"></div>
-            </div>
+            <div id="mistakes-dots" class="flex space-x-1.5"></div>
         </div>
 
-        <!-- Control Action Buttons -->
-        <div id="controls" class="flex flex-wrap items-center justify-center gap-2.5 mb-8 w-full">
-            <button id="btn-shuffle" class="px-4 py-2.5 rounded-full border border-gray-900 text-gray-900 font-semibold text-xs sm:text-sm hover:bg-gray-100 active:scale-95 transition-all">
+        <!-- Controls -->
+        <div id="controls" class="flex flex-wrap items-center justify-center gap-2 mb-6 w-full">
+            <button id="btn-shuffle" type="button" class="px-4 py-2.5 rounded-full border border-gray-900 text-gray-900 font-semibold text-xs sm:text-sm hover:bg-gray-100 active:scale-95 transition-all">
                 Shuffle
             </button>
-            <button id="btn-deselect" class="px-4 py-2.5 rounded-full border border-gray-900 text-gray-900 font-semibold text-xs sm:text-sm hover:bg-gray-100 active:scale-95 transition-all">
+            <button id="btn-deselect" type="button" class="px-4 py-2.5 rounded-full border border-gray-900 text-gray-900 font-semibold text-xs sm:text-sm hover:bg-gray-100 active:scale-95 transition-all">
                 Deselect All
             </button>
-            <button id="btn-submit" disabled class="px-6 py-2.5 rounded-full border border-gray-900 bg-gray-900 text-white font-semibold text-xs sm:text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-black active:scale-95 transition-all">
+            <button id="btn-submit" type="button" disabled class="px-6 py-2.5 rounded-full border border-gray-900 bg-gray-900 text-white font-semibold text-xs sm:text-sm disabled:opacity-30 disabled:cursor-not-allowed hover:bg-black active:scale-95 transition-all">
                 Submit
             </button>
-            <button id="btn-restart" class="hidden px-6 py-2.5 rounded-full bg-black text-white font-semibold text-xs sm:text-sm hover:bg-gray-800 active:scale-95 transition-all">
+            <button id="btn-restart" type="button" class="hidden px-6 py-2.5 rounded-full bg-black text-white font-semibold text-xs sm:text-sm hover:bg-gray-800 active:scale-95 transition-all">
                 Play Again
             </button>
         </div>
 
-        <!-- Collapsible Guess History Dropdown -->
+        <!-- Collapsible Guess History -->
         <details id="history-details" class="w-full border border-gray-200 rounded-2xl bg-white shadow-sm overflow-hidden transition-all duration-200">
-            <summary class="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 list-none font-semibold text-xs sm:text-sm text-gray-700">
-                <span id="history-summary-text" class="flex items-center gap-2">
-                    <span>Guess History</span>
+            <summary class="flex items-center justify-between p-3.5 sm:p-4 cursor-pointer hover:bg-gray-50 list-none font-semibold text-xs sm:text-sm text-gray-700">
+                <span class="flex items-center gap-2">
+                    <span id="history-header-title">▼ Guess History</span>
                     <span id="history-badge" class="bg-gray-200 text-gray-700 text-xs px-2 py-0.5 rounded-full">0</span>
                 </span>
                 <svg class="chevron w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -143,32 +171,31 @@
                 </svg>
             </summary>
             
-            <div class="px-4 pb-4 pt-1 border-t border-gray-100 space-y-2.5 max-h-60 overflow-y-auto" id="history-log">
+            <div class="px-3 pb-3 pt-1 sm:px-4 sm:pb-4 border-t border-gray-100 space-y-2 max-h-56 overflow-y-auto" id="history-log">
                 <p id="history-empty" class="text-xs text-gray-400 italic text-center py-2">No guesses submitted yet.</p>
             </div>
         </details>
+
     </div>
 
     <!-- Footer -->
-    <footer class="mt-8 text-center text-xs text-gray-400">
-        NYT Connections Clone • Editable Data Array
+    <footer class="mt-6 text-center text-xs text-gray-400">
+        NYT Connections Clone • Responsive Mobile Edition
     </footer>
 
     <script>
         /**
          * GAME DATA STRUCTURE
-         * Easily editable array of 4 distinct categories.
-         * Difficulty maps directly to category color scheme:
-         * 0 = Yellow (Easiest), 1 = Green, 2 = Blue, 3 = Purple (Hardest)
+         * Edit this array to change topics & words.
+         * Difficulty: 0=Yellow, 1=Green, 2=Blue, 3=Purple
          */
-    const categories = [
+const categories = [
         { difficulty: 0, desc: "UNIT OF TIME", items: ["WEEK", "MONTH", "YEAR", "DECADE"] },
         { difficulty: 1, desc: "ORIGINAL STAR TREK CHARACTERS", items: ["SPOCK", "SCOTTY", "UHURA", "SULU"] },
         { difficulty: 2, desc: "FIRST WORD OF DISNEY CLASSICS", items: ["101", "HERBY", "SNOW", "SLEEPING"] },
         { difficulty: 3, desc: "STARTS WITH CRAZY", items: ["LADY", "HAPPY", "DAY", "BONES"] }
     ];
 
-        // Color metadata mappings
         const DIFFICULTY_CLASSES = [
             'bg-cat-yellow',
             'bg-cat-green',
@@ -178,11 +205,11 @@
         
         const DIFFICULTY_EMOJIS = ['🟨', '🟩', '🟦', '🟪'];
 
-        // Core Game State Variables
-        let activeWords = [];       // Remaining unsolved word objects { text, categoryId }
-        let selectedIndices = [];   // Currently highlighted word indices in activeWords
-        let solvedCategories = [];  // Array of solved category IDs
-        let guessHistory = [];      // Array of objects { words: [], colors: [], feedback: "" }
+        // Game State Variables
+        let activeWords = [];       
+        let selectedIndices = [];   
+        let solvedCategories = [];  
+        let guessHistory = [];      
         let mistakesRemaining = 4;
         let isGameOver = false;
         let toastTimeout = null;
@@ -202,7 +229,7 @@
         const historyDetails = document.getElementById('history-details');
 
         /**
-         * Initializes or resets the game state
+         * Initializes or resets game state
          */
         function initGame() {
             activeWords = [];
@@ -212,7 +239,7 @@
             mistakesRemaining = 4;
             isGameOver = false;
 
-            // Populate active words array
+            // Load and flatten game words
             GAME_CATEGORIES.forEach((cat, index) => {
                 cat.items.forEach(item => {
                     activeWords.push({
@@ -222,7 +249,7 @@
                 });
             });
 
-            // Randomize grid order
+            // Randomize grid
             shuffleArray(activeWords);
 
             // Clear DOM UI
@@ -243,9 +270,6 @@
             renderGrid();
         }
 
-        /**
-         * Knuth Fisher-Yates array shuffle algorithm
-         */
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -254,14 +278,10 @@
         }
 
         /**
-         * Renders current unsolved word tiles into grid
+         * Renders current tile grid
          */
         function renderGrid() {
             gridContainer.innerHTML = '';
-            
-            // Adjust grid row count dynamically based on remaining words
-            const rows = activeWords.length / 4;
-            gridContainer.className = `w-full grid grid-cols-4 gap-2 sm:gap-2.5 mb-6`;
 
             activeWords.forEach((wordObj, index) => {
                 const tile = document.createElement('button');
@@ -269,11 +289,10 @@
                 
                 const isSelected = selectedIndices.includes(index);
                 
-                // Base classes
-                let tileClasses = "h-20 sm:h-24 rounded-xl flex items-center justify-center p-1.5 sm:p-2 text-center font-bold text-xs sm:text-sm tracking-tight leading-tight uppercase transition-all duration-150 tile-animate shadow-sm ";
+                let tileClasses = "tile-button tile-animate shadow-sm transition-all duration-150 ";
                 
                 if (isSelected) {
-                    tileClasses += "bg-[var(--tile-selected)] text-[var(--tile-text-selected)] transform scale-[0.98]";
+                    tileClasses += "bg-[var(--tile-selected)] text-[var(--tile-text-selected)] scale-[0.97]";
                 } else {
                     tileClasses += "bg-[var(--tile-bg)] text-[var(--text-primary)] hover:bg-stone-200 active:scale-95";
                 }
@@ -285,22 +304,16 @@
                 gridContainer.appendChild(tile);
             });
 
-            // Update Submit Button State
             btnSubmit.disabled = selectedIndices.length !== 4 || isGameOver;
         }
 
-        /**
-         * Toggles tile selection state
-         */
         function handleTileClick(index) {
             if (isGameOver) return;
 
             const existingIndex = selectedIndices.indexOf(index);
             if (existingIndex > -1) {
-                // Deselect
                 selectedIndices.splice(existingIndex, 1);
             } else if (selectedIndices.length < 4) {
-                // Select up to 4 tiles max
                 selectedIndices.push(index);
             }
 
@@ -308,7 +321,7 @@
         }
 
         /**
-         * Processes submitted selection guess
+         * Validates guess submission
          */
         function handleSubmitGuess() {
             if (selectedIndices.length !== 4 || isGameOver) return;
@@ -316,7 +329,7 @@
             const selectedWords = selectedIndices.map(i => activeWords[i].text).sort();
             const guessKey = selectedWords.join('|');
 
-            // 1. Check for Duplicate Guess
+            // Check duplicate guess
             const isDuplicate = guessHistory.some(g => [...g.words].sort().join('|') === guessKey);
             if (isDuplicate) {
                 showToast("Already guessed!");
@@ -324,7 +337,7 @@
                 return;
             }
 
-            // Group guess items by category ID
+            // Categorize selection matches
             const categoryCounts = {};
             selectedIndices.forEach(i => {
                 const catId = activeWords[i].categoryId;
@@ -335,40 +348,29 @@
             const maxMatch = Math.max(...counts);
             const matchingCategoryId = Object.keys(categoryCounts).find(catId => categoryCounts[catId] === 4);
 
-            // Map visual emoji sequence matching user selection
             const guessColors = selectedIndices.map(i => DIFFICULTY_EMOJIS[activeWords[i].categoryId]);
 
             if (matchingCategoryId !== undefined) {
-                // Correct Guess (4/4 matched)
                 handleCorrectGuess(parseInt(matchingCategoryId), selectedWords, guessColors);
             } else {
-                // Incorrect Guess
                 handleIncorrectGuess(maxMatch, selectedWords, guessColors);
             }
         }
 
-        /**
-         * Handles successful category group guess
-         */
         function handleCorrectGuess(catId, wordList, emojiColors) {
             solvedCategories.push(catId);
-            
-            // Log history
             recordGuessHistory(wordList, emojiColors, "Correct!");
 
-            // Remove solved words from active pool
             const solvedCategoryItems = GAME_CATEGORIES[catId].items.map(item => item.toUpperCase());
             activeWords = activeWords.filter(w => !solvedCategoryItems.includes(w.text));
             selectedIndices = [];
 
-            // Add Category Banner to top
             renderSolvedCategoryBanner(catId);
             
             if (solvedCategories.length === 4) {
-                // Victory Condition
                 isGameOver = true;
                 showToast("Great job!");
-                setTimeout(triggerVictoryEnd, 600);
+                setTimeout(triggerVictoryEnd, 500);
             } else {
                 showToast("Nice!");
             }
@@ -376,32 +378,26 @@
             renderGrid();
         }
 
-        /**
-         * Renders full-width banner for solved categories
-         */
         function renderSolvedCategoryBanner(catId) {
             const category = GAME_CATEGORIES[catId];
             const banner = document.createElement('div');
             
             const colorClass = DIFFICULTY_CLASSES[category.difficulty];
-            banner.className = `w-full rounded-xl p-4 text-center ${colorClass} row-reveal shadow-sm flex flex-col justify-center items-center`;
+            banner.className = `w-full rounded-xl p-3 sm:p-4 text-center ${colorClass} row-reveal shadow-sm flex flex-col justify-center items-center`;
             
             banner.innerHTML = `
-                <h2 class="font-extrabold text-sm sm:text-base tracking-wide uppercase mb-0.5">${category.desc}</h2>
-                <p class="text-xs sm:text-sm font-medium tracking-tight opacity-90">${category.items.join(', ')}</p>
+                <h2 class="font-extrabold text-xs sm:text-base tracking-wide uppercase mb-0.5">${category.desc}</h2>
+                <p class="text-xs sm:text-sm font-medium opacity-90">${category.items.join(', ')}</p>
             `;
             
             solvedContainer.appendChild(banner);
         }
 
-        /**
-         * Handles incorrect guess outcomes and mistake tracking
-         */
         function handleIncorrectGuess(maxMatch, wordList, emojiColors) {
             mistakesRemaining--;
             updateMistakesUI();
 
-            let feedback = "Nope!";
+            let feedback = "Nope";
             if (maxMatch === 3) {
                 feedback = "One away!";
             }
@@ -411,19 +407,14 @@
             recordGuessHistory(wordList, emojiColors, feedback);
 
             if (mistakesRemaining === 0) {
-                // Defeat Condition
                 isGameOver = true;
-                setTimeout(triggerDefeatEnd, 800);
+                setTimeout(triggerDefeatEnd, 700);
             }
         }
 
-        /**
-         * Displays defeat state and reveals remaining categories
-         */
         function triggerDefeatEnd() {
             showToast("Next time!");
             
-            // Reveal remaining categories in order
             GAME_CATEGORIES.forEach((cat, index) => {
                 if (!solvedCategories.includes(index)) {
                     renderSolvedCategoryBanner(index);
@@ -437,18 +428,12 @@
             enableRestartUI();
         }
 
-        /**
-         * Handles victory state end screen summary
-         */
         function triggerVictoryEnd() {
             showToast("CONGRATS!");
             showNYTSummaryInHistory();
             enableRestartUI();
         }
 
-        /**
-         * Displays Play Again option after game completion
-         */
         function enableRestartUI() {
             btnSubmit.classList.add('hidden');
             btnDeselect.classList.add('hidden');
@@ -456,9 +441,6 @@
             btnRestart.classList.remove('hidden');
         }
 
-        /**
-         * Adds submitted guess record to Collapsible History
-         */
         function recordGuessHistory(words, emojis, feedback) {
             guessHistory.push({ words, emojis, feedback });
 
@@ -466,14 +448,14 @@
             historyBadge.textContent = guessHistory.length;
 
             const item = document.createElement('div');
-            item.className = "flex items-center justify-between text-xs sm:text-sm bg-gray-50 p-2.5 rounded-lg border border-gray-100";
+            item.className = "flex items-center justify-between text-xs sm:text-sm bg-gray-50 p-2 sm:p-2.5 rounded-lg border border-gray-100";
             
             const resultColorClass = feedback === "Correct!" ? "text-green-600" : feedback === "One away!" ? "text-amber-600" : "text-gray-500";
 
             item.innerHTML = `
                 <div class="flex items-center space-x-2 overflow-hidden">
-                    <span class="tracking-widest text-base leading-none">${emojis.join('')}</span>
-                    <span class="font-medium text-gray-800 truncate">${words.join(', ')}</span>
+                    <span class="tracking-wider text-sm sm:text-base leading-none">${emojis.join('')}</span>
+                    <span class="font-medium text-gray-800 truncate text-xs sm:text-sm">${words.join(', ')}</span>
                 </div>
                 <span class="font-bold text-xs ${resultColorClass} shrink-0 ml-2">${feedback}</span>
             `;
@@ -481,42 +463,32 @@
             historyLog.prepend(item);
         }
 
-        /**
-         * Appends NYT-style emoji matrix inside the collapsible history log
-         */
         function showNYTSummaryInHistory() {
             const summaryBox = document.createElement('div');
-            summaryBox.className = "my-3 p-3 bg-stone-100 rounded-xl text-center border border-stone-200";
+            summaryBox.className = "my-2 p-2.5 bg-stone-100 rounded-xl text-center border border-stone-200";
             
             let emojiMatrixHTML = guessHistory.map(g => g.emojis.join('')).join('<br>');
             
             summaryBox.innerHTML = `
-                <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Results Grid</div>
-                <div class="text-xl tracking-widest leading-relaxed">${emojiMatrixHTML}</div>
+                <div class="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Results Grid</div>
+                <div class="text-base sm:text-lg tracking-widest leading-relaxed">${emojiMatrixHTML}</div>
             `;
 
             historyLog.prepend(summaryBox);
-            // Open accordion to display final result summary
             historyDetails.open = true;
         }
 
-        /**
-         * Updates mistake indicator dot counts
-         */
         function updateMistakesUI() {
             mistakesDots.innerHTML = '';
             for (let i = 0; i < 4; i++) {
                 const dot = document.createElement('div');
-                dot.className = `w-3 h-3 rounded-full transition-all duration-300 ${
+                dot.className = `w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
                     i < mistakesRemaining ? 'bg-gray-800' : 'bg-gray-200 scale-75'
                 }`;
                 mistakesDots.appendChild(dot);
             }
         }
 
-        /**
-         * Displays short-lived toast message
-         */
         function showToast(text) {
             if (toastTimeout) clearTimeout(toastTimeout);
             
@@ -531,9 +503,6 @@
             }, 2000);
         }
 
-        /**
-         * Applies shake animation on grid when guess is invalid or incorrect
-         */
         function triggerShakeAnimation() {
             gridContainer.classList.add('shake-animation');
             setTimeout(() => {
@@ -557,7 +526,7 @@
         btnSubmit.onclick = handleSubmitGuess;
         btnRestart.onclick = initGame;
 
-        // Launch Game on Page Load
+        // Initialize on load
         window.onload = initGame;
     </script>
 </body>
